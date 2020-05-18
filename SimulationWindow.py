@@ -11,8 +11,8 @@ class SimulationWindow:
     def __init__(self):
         pygame.init()
         pygame.display.set_caption("Drone Simulation")
-        width = 1500
-        height = 1500
+        width = 1280
+        height = 720
         self.screen = pygame.display.set_mode((width, height))
         self.clock = pygame.time.Clock()
         self.ticks = 60
@@ -34,6 +34,7 @@ class SimulationWindow:
 
                 # getting user input
                 key_stroke = pygame.key.get_pressed()
+
                 if key_stroke[pygame.K_UP]:  # the up key
                     if drone.velocity.x < 0:
                         drone.acceleration = Drone.BRAKE_DEACCELERATION
@@ -65,6 +66,8 @@ class SimulationWindow:
                 drone.update(dt)
                 # Drawing
                 self.screen.fill((0, 0, 0))
+                map_img = pygame.image.load(r'C:\Users\97254\PyCharmProjects\DroneSim\.maps\sim_20.png') # map location
+                self.screen.blit(map_img, (0, 0))
                 rotated = pygame.transform.rotate(drone_img, drone.angle)
                 rect = rotated.get_rect()
                 self.screen.blit(rotated, drone.position * ppu - (rect.width / 2, rect.height / 2))
