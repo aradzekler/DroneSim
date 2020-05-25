@@ -59,15 +59,16 @@ class Rect:
 
         return Rect(x, y, width, height, self.options)
 
+
 # map colors.
 def rgb(tile_sign):
     if tile_sign == '0':
-        return (118, 165, 204)
+        return 118, 165, 204
     if tile_sign == '1':
-        return (74, 103, 127)
+        return 74, 103, 127
     if tile_sign == '2':
-        return (224, 231, 255)
-    return (0, 0, 0)
+        return 224, 231, 255
+    return 0, 0, 0
 
 
 def create_preview(mappath, width, height, zoom=1):
@@ -156,7 +157,7 @@ MAP_HEIGHT = 1000
 
 SPLITS = 5
 
-MAPS_PATH = './.maps'
+MAPS_PATH = '../.maps'
 MAP_FORMAT = 'sim_{}.map'
 
 wrap_rect = Rect(0, 0, MAP_WIDTH, MAP_HEIGHT, DEFAULT_OPTIONS)
@@ -202,8 +203,8 @@ def update_rooms(node):
             for x in range(c1[0], c2[0]):
                 MAP_ARRAY[y][x] = "2"
 
-        for x in range(c1[0], c2[0]+4):
-            for y in range(c1[1], c2[1]+4):
+        for x in range(c1[0], c2[0] + 4):
+            for y in range(c1[1], c2[1] + 4):
                 MAP_ARRAY[y][x] = "2"
 
     update_rooms(node.left)

@@ -67,7 +67,7 @@ class SimulationWindow:
                 # Drawing
                 self.screen.fill((0, 0, 0))
                 map_img = pygame.image.load(r'C:\Users\97254\PyCharmProjects\DroneSim\.maps\sim_20.png') # map location
-                self.screen.blit(map_img, (0, 0))
+                # self.screen.blit(map_img, (0, 0))
                 rotated = pygame.transform.rotate(drone_img, drone.angle)
                 rect = rotated.get_rect()
                 self.screen.blit(rotated, drone.position * ppu - (rect.width / 2, rect.height / 2))
