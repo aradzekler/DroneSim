@@ -4,7 +4,10 @@ import pygame
 import math as math
 from PIL import Image
 
-# TODO: ADD COLLISION, ADD LIDARS, ADD AI
+# TODO: ADD LIDARS, ADD AI, GENERICS
+# TODO: SET UP GUI BUTTONS.
+# lidar idea: translate map to black and white (did that) and draw a straight lines from out drone..
+
 MAX_VELOCITY = 20
 BRAKE_DEACCELERATION = 10
 FREE_DEACCELERATION = 2
@@ -51,17 +54,32 @@ class Model:
     # def omega(self, state, inp):
 
 
-class SimpleDrone:
+# collision detection function. receives the player rectangle and a collision blocks list
+def collide(player_rect, collide_list):
+    for block in collide_list:
+        if player_rect.colliderect(block):
+            return True
 
+
+def deg_to_rad(deg):
+    return deg / 180.0 * math.pi
+
+
+class SimpleDrone:
     def __init__(self, x, y):
         self.body = pygame.image.load("Images//Body//Grey.png")
         self.rotors = pygame.image.load("Images//Wheels//Black.png")
-        self.rect = self.body.get_rect()  # get rectangle the size of the body.
-        self.start_loc_x = x / 2
-        self.start_loc_y = y / 2
-        self.rect.center = self.start_loc_x, self.start_loc_y
-        # self.hitbox = pygame.Rect(self.start_loc_x, self.start_loc_y, 32, 32)
+        self.rect = self.body.get_rect()  # get rectangle the size of the body. our hitbox
+        self.rect.x = x  # x location
+        self.rect.y = y
+        self.rect.center = self.rect.x, self.rect.y
         self.game_map = Map("future path here")
+        self.lidar_sensor_range = 50
+        self.front_detect_rect = self.rect
+        self.front_detect_rect.x += self.lidar_sensor_range
+
+        # sensors
+        self.front_detection_lidar = False  # forward LIDAR
 
         # movement states for easy movement capturing.
         self.forward = False
@@ -80,14 +98,22 @@ class SimpleDrone:
         self.move_x = 0
         self.move_y = 0
 
+    # setter method
+    def set_rectx(self, x):
+        self.rect.x = x
+
+    def set_recty(self, y):
+        self.rect.y = y
+
     def reset_data(self):
         self.left = False
         self.right = False
         self.forward = False
         self.backward = False
+        self.front_detection_lidar = False
 
     # Rotation movement.
-    def rotate(self, player_rect, collide_list):
+    def rotate(self):
         if self.angle > 360:
             self.angle = 0
         else:
@@ -98,12 +124,7 @@ class SimpleDrone:
         if self.right:
             self.angle -= self.turn_speed * self.current_speed
 
-    def move(self, player_rect, collide_list):
-        ''' This wastes tons of memory! need to find another solution
-        for block in collide_list:
-            if player_rect.colliderect(block):
-                print("collision")
-        '''
+    def move(self):
         if self.forward:
             if self.current_speed < self.top_speed:
                 self.current_speed += self.acceleration
@@ -112,24 +133,26 @@ class SimpleDrone:
                 self.current_speed -= self.deceleration
             else:
                 self.current_speed = 0
-
         angle_rad = deg_to_rad(self.angle)
         self.move_x = -(float(self.current_speed * math.sin(angle_rad)))
         self.move_y = -(float(self.current_speed * math.cos(angle_rad)))
-        self.start_loc_x += self.move_x
-        self.start_loc_y += self.move_y
+        self.rect.x += self.move_x
+        self.rect.y += self.move_y
 
     def display(self, main_surface):
         temp_image = pygame.transform.rotate(self.body, self.angle)
-        main_surface.blit(temp_image, (self.start_loc_x, self.start_loc_y))
+        main_surface.blit(temp_image, (self.rect.x, self.rect.y))
         temp_image = pygame.transform.rotate(self.rotors, self.angle)
-        main_surface.blit(temp_image, (self.start_loc_x, self.start_loc_y))
+        main_surface.blit(temp_image, (self.rect.x, self.rect.y))
 
     def update(self):
         self.move_x = 0
         self.move_y = 0
-        self.rotate(self.rect, self.game_map.collidelist)
-        self.move(self.rect, self.game_map.collidelist)
+        if collide(self.rect, self.game_map.collidelist):
+            self.is_colliding = True
+
+        self.rotate()
+        self.move()
         self.reset_data()
 
 
@@ -161,7 +184,3 @@ class Map:
                         self.map_array[x][y] = (0, 0, 0)
                     self.map_array[x][y] = (255, 255, 255)
             img.save("new_map.png")
-
-
-def deg_to_rad(deg):
-    return deg / 180.0 * math.pi

@@ -1,6 +1,6 @@
 from Drone import *
 
-drone = SimpleDrone(200, 300)
+drone = SimpleDrone(100, 300)
 pygame.font.init()
 
 clock = pygame.time.Clock()
@@ -59,7 +59,10 @@ while running:
                "Y Axis movement: " + str("%.2f" % drone.move_y),
                "F key" + str(drone.forward),
                "L key" + str(drone.left),
-               "R key" + str(drone.right)]
+               "R key" + str(drone.right),
+               "Collided: " + str(drone.is_colliding)]  # collision showing not working, but it exists
+    # it doesnt work prob becuase every action ends with
+    # is_colliding = False.
 
     update_all(to_update)
     display_all(main_s, to_display, to_text)
