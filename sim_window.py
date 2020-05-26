@@ -1,6 +1,6 @@
 from Drone import *
 
-drone = SimpleDrone(100, 300)
+
 pygame.font.init()
 
 clock = pygame.time.Clock()
@@ -8,7 +8,8 @@ font = pygame.font.SysFont("", 20)
 
 pygame.init()
 game_map = Map("future path here")
-main_s = pygame.display.set_mode((game_map.map_width, game_map.map_height))
+main_s = pygame.display.set_mode((game_map.map_width, game_map.map_height)) # our main display
+drone = SimpleDrone(100, 300, main_s)
 sim_map = pygame.image.load('new_map.png')
 
 

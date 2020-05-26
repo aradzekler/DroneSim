@@ -1,6 +1,7 @@
 import numpy as np
 from pygame.math import Vector2
 import pygame
+from pygame.color import THECOLORS
 import math as math
 from PIL import Image
 
@@ -65,8 +66,25 @@ def deg_to_rad(deg):
     return deg / 180.0 * math.pi
 
 
+def make_sonar_arm(x, y):
+    spread = 10  # Default spread.
+    sensor_distance = 15  # Gap before first sensor.
+    arm_points = []
+    for i in range(1, sensor_distance):
+        arm_points.append((x + (spread * i), y))
+
+    return arm_points
+
+
+def get_track_or_not(reading):
+    if reading == THECOLORS['black']:
+        return 0
+    else:
+        return 1
+
+
 class SimpleDrone:
-    def __init__(self, x, y):
+    def __init__(self, x, y, screen):
         self.body = pygame.image.load("Images//Body//Grey.png")
         self.rotors = pygame.image.load("Images//Wheels//Black.png")
         self.rect = self.body.get_rect()  # get rectangle the size of the body. our hitbox
@@ -77,9 +95,12 @@ class SimpleDrone:
         self.lidar_sensor_range = 50
         self.front_detect_rect = self.rect
         self.front_detect_rect.x += self.lidar_sensor_range
+        self.screen = screen
+        self.driving_direction = Vec2d(1, 0).rotated(self.car_body.angle)
 
         # sensors
         self.front_detection_lidar = False  # forward LIDAR
+        self.show_sensors = True
 
         # movement states for easy movement capturing.
         self.forward = False
@@ -144,6 +165,7 @@ class SimpleDrone:
         main_surface.blit(temp_image, (self.rect.x, self.rect.y))
         temp_image = pygame.transform.rotate(self.rotors, self.angle)
         main_surface.blit(temp_image, (self.rect.x, self.rect.y))
+        readings = self.get_sonar_readings(self.rect.x, self.rect.y, main_surface)
 
     def update(self):
         self.move_x = 0
@@ -155,6 +177,70 @@ class SimpleDrone:
         self.move()
         self.reset_data()
 
+    # not ready
+    def front_det(self):
+        if self.game_map[self.rect.x + 50][self.rect.y] == (0, 0, 0):
+            fuck = 0
+
+
+
+    # TODO: PROBLEM! something isnt right in the formula for calculating the angle
+    # TODO: ALSO, 2 arms arent showing when switching x_change and y_change to radians
+    def get_rotated_point(self, x_1, y_1, x_2, y_2, angle):
+        radians = math.radians(angle)
+        # Rotate x_2, y_2 around x_1, y_1 by angle.
+        x_change = (x_2 - x_1) * math.cos(radians) + (y_2 - y_1) * math.sin(radians)
+        y_change = (y_1 - y_2) * math.cos(radians) - (x_1 - x_2) * math.sin(radians)
+        new_x = x_change + x_1
+        new_y = y_change + y_1
+        return int(new_x), int(new_y)
+
+    def get_arm_distance(self, arm, x, y, offset, screen):
+        # Used to count the distance.
+        i = 0
+
+        # Look at each point and see if we've hit something.
+        for point in arm:
+            i += 1
+
+            # Move the point to the right spot.
+            rotated_p = self.get_rotated_point(
+                x, y, point[0], point[1], self.angle + offset)
+
+            # Check if we've hit something. Return the current i (distance) if we did.
+            if rotated_p[0] <= 0 or rotated_p[1] <= 0 \
+                    or rotated_p[0] >= self.game_map.map_width or rotated_p[1] >= self.game_map.map_height:
+                print(i)
+                return i  # Sensor is off the screen.
+            else:
+                obs = screen.get_at(rotated_p)
+                if get_track_or_not(obs) != 0:
+                    return i
+
+            if self.show_sensors:
+                pygame.draw.circle(screen, (255, 0, 255), rotated_p, 2)
+
+        # Return the distance for the arm.
+        return i
+
+    def get_sonar_readings(self, x, y, screen):
+        readings = []
+
+        # Make our arms.
+        arm_left = make_sonar_arm(x, y)
+        arm_middle = arm_left
+        arm_right = arm_left
+
+        # Rotate them and get readings.
+        readings.append(self.get_arm_distance(arm_left, x, y, 0.75, screen))
+        readings.append(self.get_arm_distance(arm_middle, x, y, 0, screen))
+        readings.append(self.get_arm_distance(arm_right, x, y, -0.75, screen))
+
+        if self.show_sensors:
+            pygame.display.update()
+
+        return readings
+
 
 # Main class for dealing with out map.
 class Map:
@@ -165,9 +251,9 @@ class Map:
         self.collidelist = []
 
         # self.map_array = array([self.map_width][self.map_height])
-        with Image.open("Images//p15.png") as img:
-            self.map_width, self.map_height = img.size
-            rgb_image = img.convert("RGB")
+        with Image.open("Images//p15.png") as self.img:
+            self.map_width, self.map_height = self.img.size
+            rgb_image = self.img.convert("RGB")
 
             self.map_array = []
             for i in range(self.map_width):
@@ -178,9 +264,9 @@ class Map:
                 for y in range(self.map_height):
                     rgb_pixel_value = rgb_image.getpixel((x, y))
                     if rgb_pixel_value != (255, 255, 255):  # if not completly white, turn black
-                        img.putpixel((x, y), (0, 0, 0))
+                        self.img.putpixel((x, y), (0, 0, 0))
                         self.block = pygame.Rect(x, y, 1, 1)
                         self.collidelist.append(self.block)
                         self.map_array[x][y] = (0, 0, 0)
                     self.map_array[x][y] = (255, 255, 255)
-            img.save("new_map.png")
+            self.img.save("new_map.png")
