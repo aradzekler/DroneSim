@@ -1,33 +1,30 @@
 from Drone import *
 
 
-pygame.font.init()
-
-clock = pygame.time.Clock()
-font = pygame.font.SysFont("", 20)
-
-pygame.init()
-game_map = Map("future path here")
-main_s = pygame.display.set_mode((game_map.map_width, game_map.map_height)) # our main display
-drone = SimpleDrone(100, 300, main_s)
-sim_map = pygame.image.load('new_map.png')
-
-
+# displaying the screen.
 def display_all(main_surface, display_list, text_list):
-    # main_surface.fill((0, 100, 100))
-
     for element in display_list:
         element.display(main_surface)
     for element_val in range(0, len(text_list)):  # adding text in the side of the screen
         main_surface.blit(font.render(str(text_list[element_val]), True, (0, 255, 0)), (10, 10 + (20 * element_val)))
 
-
+# update all elements in list.
 def update_all(update_list):
     for element in update_list:
         element.update()
 
 
-running = True
+pygame.font.init()
+clock = pygame.time.Clock()
+font = pygame.font.SysFont("", 20)
+pygame.init() # initialize pygame window
+game_map = Map()  # setting map object, map choosing is inside the object.
+main_s = pygame.display.set_mode((game_map.map_width, game_map.map_height))  # our main display
+drone = SimpleDrone(100, 300, main_s, game_map) # drone object
+sim_map = pygame.image.load('new_map.png') # loading the map with the temp name given.
+
+running = True # simulation is running
+
 while running:
     clock.tick(60)
     main_s.fill((0, 0, 0))
@@ -53,7 +50,7 @@ while running:
 
     to_update = [drone]
     to_display = [drone]
-    to_text = ["FPS: " + str("%.0f" % clock.get_fps()),
+    to_text = ["FPS: " + str("%.0f" % clock.get_fps()),   # our telemetry window.
                "Drone angle: " + str("%.2f" % drone.angle),
                "Current speed: " + str("%.2f" % drone.current_speed),
                "X Axis Movement: " + str("%.2f" % drone.move_x),

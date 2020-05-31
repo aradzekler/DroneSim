@@ -4,6 +4,7 @@ import pygame
 from pygame.color import THECOLORS
 import math as math
 from PIL import Image
+import easygui as eg  # https://github.com/robertlugg/easygui   - easy way to open file dialog and other gui things.
 
 # TODO: ADD LIDARS, ADD AI, GENERICS
 # TODO: SET UP GUI BUTTONS.
@@ -35,7 +36,6 @@ class Model:
         self.type = "QUAD"  # drone type.
         self.steer = 0.0
         self.acceleration = 0.0
-        # self.sensors =
 
     def update(self, dt):
         self.velocity += (self.acceleration * dt, 0)
@@ -62,10 +62,12 @@ def collide(player_rect, collide_list):
             return True
 
 
+# function for converting degrees to radians.
 def deg_to_rad(deg):
     return deg / 180.0 * math.pi
 
 
+# adding a "sonar arm", which will detect movement in a straight line from origin
 def make_sonar_arm(x, y):
     spread = 10  # Default spread.
     sensor_distance = 15  # Gap before first sensor.
@@ -76,6 +78,7 @@ def make_sonar_arm(x, y):
     return arm_points
 
 
+# reads if the current reading is a wall or not.
 def get_track_or_not(reading):
     if reading == THECOLORS['black']:
         return 0
@@ -83,24 +86,27 @@ def get_track_or_not(reading):
         return 1
 
 
+# our main drone class for now., getting a starting x and y coordinations, screen - pygame.display (our game 'canvas'), gamemap - our Map object
 class SimpleDrone:
-    def __init__(self, x, y, screen):
-        self.body = pygame.image.load("Images//Body//Grey.png")
+    def __init__(self, x, y, screen, game_map):
+        self.body = pygame.image.load("Images//Body//Grey.png")  # images for the model itself.
         self.rotors = pygame.image.load("Images//Wheels//Black.png")
         self.rect = self.body.get_rect()  # get rectangle the size of the body. our hitbox
         self.rect.x = x  # x location
         self.rect.y = y
-        self.rect.center = self.rect.x, self.rect.y
-        self.game_map = Map("future path here")
-        self.lidar_sensor_range = 50
-        self.front_detect_rect = self.rect
-        self.front_detect_rect.x += self.lidar_sensor_range
+        self.game_map = game_map
         self.screen = screen
-        self.driving_direction = Vec2d(1, 0).rotated(self.car_body.angle)
+        self.rect.center = self.rect.x, self.rect.y  # center point of our drone
+
+        self.front_detect_rect = self.rect  # drone front
+
+        # self.driving_direction = Vec2d(1, 0).rotated(self.angle)
 
         # sensors
         self.front_detection_lidar = False  # forward LIDAR
         self.show_sensors = True
+        self.lidar_sensor_range = 50
+        self.front_detect_rect.x += self.lidar_sensor_range
 
         # movement states for easy movement capturing.
         self.forward = False
@@ -108,9 +114,10 @@ class SimpleDrone:
         self.left = False
         self.right = False
         self.angle = 0
-        self.is_colliding = False
+        self.is_colliding = False  # collision detection param
 
         # navigation variables.
+        # TODO: determine actual speed ( in meters/sec or something, not in arbitrary values
         self.turn_speed = 0.5
         self.top_speed = 3
         self.acceleration = 0.1
@@ -119,13 +126,14 @@ class SimpleDrone:
         self.move_x = 0
         self.move_y = 0
 
-    # setter method
-    def set_rectx(self, x):
+    # setter methods for rectx and recty
+    def set_rect_x(self, x):
         self.rect.x = x
 
-    def set_recty(self, y):
+    def set_rect_y(self, y):
         self.rect.y = y
 
+    # resetting variables.
     def reset_data(self):
         self.left = False
         self.right = False
@@ -133,7 +141,7 @@ class SimpleDrone:
         self.backward = False
         self.front_detection_lidar = False
 
-    # Rotation movement.
+    # Rotation movement angle.
     def rotate(self):
         if self.angle > 360:
             self.angle = 0
@@ -145,6 +153,7 @@ class SimpleDrone:
         if self.right:
             self.angle -= self.turn_speed * self.current_speed
 
+    # actual movement
     def move(self):
         if self.forward:
             if self.current_speed < self.top_speed:
@@ -160,6 +169,7 @@ class SimpleDrone:
         self.rect.x += self.move_x
         self.rect.y += self.move_y
 
+    # display the drone on the map.
     def display(self, main_surface):
         temp_image = pygame.transform.rotate(self.body, self.angle)
         main_surface.blit(temp_image, (self.rect.x, self.rect.y))
@@ -167,10 +177,11 @@ class SimpleDrone:
         main_surface.blit(temp_image, (self.rect.x, self.rect.y))
         readings = self.get_sonar_readings(self.rect.x, self.rect.y, main_surface)
 
+    # updating function for movement
     def update(self):
-        self.move_x = 0
+        self.move_x = 0 # no momentum
         self.move_y = 0
-        if collide(self.rect, self.game_map.collidelist):
+        if collide(self.rect, self.game_map.collide_list):
             self.is_colliding = True
 
         self.rotate()
@@ -182,19 +193,18 @@ class SimpleDrone:
         if self.game_map[self.rect.x + 50][self.rect.y] == (0, 0, 0):
             fuck = 0
 
-
-
     # TODO: PROBLEM! something isnt right in the formula for calculating the angle
     # TODO: ALSO, 2 arms arent showing when switching x_change and y_change to radians
     def get_rotated_point(self, x_1, y_1, x_2, y_2, angle):
         radians = math.radians(angle)
         # Rotate x_2, y_2 around x_1, y_1 by angle.
-        x_change = (x_2 - x_1) * math.cos(radians) + (y_2 - y_1) * math.sin(radians)
-        y_change = (y_1 - y_2) * math.cos(radians) - (x_1 - x_2) * math.sin(radians)
+        x_change = (x_2 - x_1) * math.cos(angle) + (y_2 - y_1) * math.sin(angle)
+        y_change = (y_1 - y_2) * math.cos(angle) - (x_1 - x_2) * math.sin(angle)
         new_x = x_change + x_1
         new_y = y_change + y_1
         return int(new_x), int(new_y)
 
+    # sonar detection function
     def get_arm_distance(self, arm, x, y, offset, screen):
         # Used to count the distance.
         i = 0
@@ -223,6 +233,7 @@ class SimpleDrone:
         # Return the distance for the arm.
         return i
 
+    # display arms on map
     def get_sonar_readings(self, x, y, screen):
         readings = []
 
@@ -244,15 +255,15 @@ class SimpleDrone:
 
 # Main class for dealing with out map.
 class Map:
-    def __init__(self, path):
-        self.path = path
+    def __init__(self):
         self.map_width = 0
         self.map_height = 0
-        self.collidelist = []
+        self.collide_list = []  # a list full of all the 'black spots'/walls
+        map_path = eg.fileopenbox()  # opens a file choosing dialog.
 
         # self.map_array = array([self.map_width][self.map_height])
-        with Image.open("Images//p15.png") as self.img:
-            self.map_width, self.map_height = self.img.size
+        with Image.open(map_path) as self.img: # open the chosen map file as image.
+            self.map_width, self.map_height = self.img.size  # size of map.
             rgb_image = self.img.convert("RGB")
 
             self.map_array = []
@@ -263,10 +274,10 @@ class Map:
             for x in range(self.map_width):
                 for y in range(self.map_height):
                     rgb_pixel_value = rgb_image.getpixel((x, y))
-                    if rgb_pixel_value != (255, 255, 255):  # if not completly white, turn black
+                    if rgb_pixel_value != (255, 255, 255):  # if not completly white, turn black (colored - walls, white - path)
                         self.img.putpixel((x, y), (0, 0, 0))
                         self.block = pygame.Rect(x, y, 1, 1)
-                        self.collidelist.append(self.block)
+                        self.collide_list.append(self.block)
                         self.map_array[x][y] = (0, 0, 0)
                     self.map_array[x][y] = (255, 255, 255)
             self.img.save("new_map.png")
