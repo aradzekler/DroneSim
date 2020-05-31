@@ -86,7 +86,8 @@ def get_track_or_not(reading):
         return 1
 
 
-# our main drone class for now., getting a starting x and y coordinations, screen - pygame.display (our game 'canvas'), gamemap - our Map object
+# our main drone class for now., getting a starting x and y coordinations, screen - pygame.display (our game
+# 'canvas'), gamemap - our Map object
 class SimpleDrone:
     def __init__(self, x, y, screen, game_map):
         self.body = pygame.image.load("Images//Body//Grey.png")  # images for the model itself.
