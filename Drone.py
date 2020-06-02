@@ -53,7 +53,6 @@ class Model:
             self.angle += math.degrees(angular_velocity) * dt
 
 
-
 # collision detection function. receives the player rectangle and a collision blocks list
 def collide(player_rect, collide_list):
     for block in collide_list:
