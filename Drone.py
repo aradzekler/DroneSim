@@ -5,6 +5,7 @@ from pygame.color import THECOLORS
 import math as math
 from PIL import Image
 import easygui as eg  # https://github.com/robertlugg/easygui   - easy way to open file dialog and other gui things.
+import Model_States
 
 # TODO: ADD LIDARS, ADD AI, GENERICS
 # TODO: SET UP GUI BUTTONS.
@@ -32,7 +33,7 @@ class Model:
         self.length = 0.5  # drone have a diameter of 0.5m
         self.ro_area = np.pi * self.ro_rad ** 2  # rotor total area [m^2]
         self.position = Vector2(x, y)
-        self.state = 0  # the drone state, 0 is manual
+        self.state = Model_States.ManualState()  # the drone state, 0 is manual
         self.type = "QUAD"  # drone type.
         self.steer = 0.0
         self.acceleration = 0.0
@@ -51,8 +52,6 @@ class Model:
             self.position += self.velocity.rotate(-self.angle) * dt
             self.angle += math.degrees(angular_velocity) * dt
 
-    # method for computing change based on state and user input if exists.
-    # def omega(self, state, inp):
 
 
 # collision detection function. receives the player rectangle and a collision blocks list
@@ -90,14 +89,15 @@ def get_track_or_not(reading):
 # 'canvas'), gamemap - our Map object
 class SimpleDrone:
     def __init__(self, x, y, screen, game_map):
-        self.body = pygame.image.load("Images//Body//Grey.png")  # images for the model itself.
-        self.rotors = pygame.image.load("Images//Wheels//Black.png")
+        self.body = pygame.image.load("Images//Body//Grey.png").convert()  # images for the model itself.
+        self.rotors = pygame.image.load("Images//Wheels//Black.png").convert()
         self.rect = self.body.get_rect()  # get rectangle the size of the body. our hitbox
         self.rect.x = x  # x location
         self.rect.y = y
         self.game_map = game_map
         self.screen = screen
         self.rect.center = self.rect.x, self.rect.y  # center point of our drone
+        self.state = Model_States.ManualState  # the drone state, 0 is manual
 
         self.front_detect_rect = self.rect  # drone front
 
@@ -126,6 +126,16 @@ class SimpleDrone:
         self.current_speed = 0
         self.move_x = 0
         self.move_y = 0
+
+    def on_event(self, event):
+        """
+        This is the bread and butter of the state machine. Incoming events are
+        delegated to the given states which then handle the event. The result is
+        then assigned as the new state (implementation in Model_States.py.
+        """
+
+        # The next state will be the result of the on_event function.
+        self.state = self.state.on_event(event)
 
     # setter methods for rectx and recty
     def set_rect_x(self, x):
@@ -180,7 +190,7 @@ class SimpleDrone:
 
     # updating function for movement
     def update(self):
-        self.move_x = 0 # no momentum
+        self.move_x = 0  # no momentum
         self.move_y = 0
         if collide(self.rect, self.game_map.collide_list):
             self.is_colliding = True
@@ -263,7 +273,7 @@ class Map:
         map_path = eg.fileopenbox()  # opens a file choosing dialog.
 
         # self.map_array = array([self.map_width][self.map_height])
-        with Image.open(map_path) as self.img: # open the chosen map file as image.
+        with Image.open(map_path) as self.img:  # open the chosen map file as image.
             self.map_width, self.map_height = self.img.size  # size of map.
             rgb_image = self.img.convert("RGB")
 
@@ -275,7 +285,8 @@ class Map:
             for x in range(self.map_width):
                 for y in range(self.map_height):
                     rgb_pixel_value = rgb_image.getpixel((x, y))
-                    if rgb_pixel_value != (255, 255, 255):  # if not completly white, turn black (colored - walls, white - path)
+                    if rgb_pixel_value != (
+                            255, 255, 255):  # if not completly white, turn black (colored - walls, white - path)
                         self.img.putpixel((x, y), (0, 0, 0))
                         self.block = pygame.Rect(x, y, 1, 1)
                         self.collide_list.append(self.block)
