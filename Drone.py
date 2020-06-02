@@ -88,6 +88,8 @@ def get_track_or_not(reading):
 # 'canvas'), gamemap - our Map object
 class SimpleDrone:
     def __init__(self, x, y, screen, game_map):
+        self.start_loc_y = 300
+        self.start_loc_x = 500
         self.body = pygame.image.load("Images//Body//Grey.png").convert()  # images for the model itself.
         self.rotors = pygame.image.load("Images//Wheels//Black.png").convert()
         self.rect = self.body.get_rect()  # get rectangle the size of the body. our hitbox
@@ -96,7 +98,9 @@ class SimpleDrone:
         self.game_map = game_map
         self.screen = screen
         self.rect.center = self.rect.x, self.rect.y  # center point of our drone
-        self.state = Model_States.ManualState  # the drone state, 0 is manual
+        manual_state = Model_States.ManualState()
+        auto_state = Model_States.AutoState()
+        self.state = manual_state  # the drone state
 
         self.front_detect_rect = self.rect  # drone front
 
@@ -130,9 +134,8 @@ class SimpleDrone:
         """
         This is the bread and butter of the state machine. Incoming events are
         delegated to the given states which then handle the event. The result is
-        then assigned as the new state (implementation in Model_States.py.
+        then assigned as the new state (implementation in Model_States.py.)
         """
-
         # The next state will be the result of the on_event function.
         self.state = self.state.on_event(event)
 

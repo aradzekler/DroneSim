@@ -1,9 +1,11 @@
 asgiref==3.2.7
 Django==3.0.6
 image==1.5.32
-numpy==1.18.4
-Pillow==7.1.2
-pygame==1.9.6
+numpy~=1.17.4
+Pillow~=5.2.0
+pygame~=1.9.2a0
 pytz==2020.1
 six==1.15.0
 sqlparse==0.3.1
+
+easygui~=0.98.1

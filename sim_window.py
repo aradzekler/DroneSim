@@ -23,7 +23,7 @@ def draw_button(button, screen):
 
 
 # creating a simple button in pygame
-def create_button(x, y, w, h, text, callback):
+def create_button(x, y, w, h, text):
     # The button is a dictionary consisting of the rect, text,
     # text rect, color and the callback function.
     text_surf = FONT.render(text, True, WHITE)
@@ -34,21 +34,8 @@ def create_button(x, y, w, h, text, callback):
         'text': text_surf,
         'text rect': text_rect,
         'color': INACTIVE_BUTT_COLOR,
-        'callback': callback,
     }
     return button
-
-
-# A callback function for the button. changes model states.
-def switch_manual_auto(model):
-    if model.state == Model_States.ManualState:
-        model.state = Model_States.AutoState
-        print("auto")
-        return
-    elif model.state == Model_States.AutoState:
-        model.state = Model_States.ManualState
-        print("manual")
-        return
 
 
 pygame.font.init()
@@ -64,8 +51,7 @@ game_map = Map()  # setting map object, map choosing is inside the object.
 main_s = pygame.display.set_mode((game_map.map_width, game_map.map_height))  # our main display
 drone = SimpleDrone(100, 300, main_s, game_map)  # drone object, starting from coordinates 100,300
 sim_map = pygame.image.load('new_map.png').convert()  # loading the map with the temp name given.
-button1 = create_button(game_map.map_width - 150, game_map.map_height - 50, 150, 50, 'Manual/Auto',
-                        switch_manual_auto(drone))
+button1 = create_button(game_map.map_width - 150, game_map.map_height - 50, 150, 50, 'Manual/Auto')
 # button in the right-down corner.
 button_list = [button1]  # a list containing all buttons
 running = True  # simulation is running
@@ -83,9 +69,8 @@ while running:
                 for button in button_list:
                     # `event.pos` is the mouse position.
                     if button['rect'].collidepoint(event.pos):
-                        # execute function in the callback button list
-                        # button['callback'](drone)
-                        switch_manual_auto(drone)
+                        # execute function in the state machine
+                        drone.state = drone.state.on_event('switch_state')
         elif event.type == pygame.MOUSEMOTION:
             # When the mouse gets moved, change the color of the
             # buttons if they collide with the mouse.
@@ -95,7 +80,7 @@ while running:
                 else:
                     button['color'] = INACTIVE_BUTT_COLOR
 
-    if drone.state == Model_States.ManualState:  # if we are in manual
+    if drone.state.on_event('manual_control') == Model_States.ManualState:  # if we are in manual
         # TODO: a method for logging key pressings.
         key = pygame.key.get_pressed()
         if key[pygame.K_LEFT]:
@@ -107,10 +92,9 @@ while running:
         if key[pygame.K_DOWN]:
             drone.backward = True
         if key[pygame.K_r]:
-            drone.start_loc_x = 500
-            drone.start_loc_y = 300
             drone.angle = 0
-    # elif drone.state == Model_States.AutoState:
+    elif drone.state.on_event('auto_control') == Model_States.AutoState: # if we are in auto state
+        continue
     # TODO: implement autostate
     # need to implement auto state
 
