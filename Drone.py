@@ -1,10 +1,12 @@
-import numpy as np
-from pygame.math import Vector2
-import pygame
-from pygame.color import THECOLORS
 import math as math
-from PIL import Image
+
 import easygui as eg  # https://github.com/robertlugg/easygui   - easy way to open file dialog and other gui things.
+import numpy as np
+import pygame
+from PIL import Image
+from pygame.color import THECOLORS
+from pygame.math import Vector2
+
 import Model_States
 
 # TODO: ADD LIDARS, ADD AI, GENERICS
@@ -134,7 +136,7 @@ class SimpleDrone:
         """
         This is the bread and butter of the state machine. Incoming events are
         delegated to the given states which then handle the event. The result is
-        then assigned as the new state (implementation in Model_States.py.)
+        then assigned as the new state (inteface in Model_States.py.)
         """
         # The next state will be the result of the on_event function.
         self.state = self.state.on_event(event)
