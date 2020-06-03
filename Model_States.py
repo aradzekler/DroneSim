@@ -11,7 +11,6 @@ class ManualState(State):
             return ManualState
         if event == 'switch_state':
             return AutoState()
-
         return self
 
 

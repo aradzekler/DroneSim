@@ -52,14 +52,14 @@ game_map = Map()  # setting map object, map choosing is inside the object.
 main_s = pygame.display.set_mode((game_map.map_width, game_map.map_height))  # our main display
 drone = SimpleDrone(100, 300, main_s, game_map)  # drone object, starting from coordinates 100,300
 sim_map = pygame.image.load('new_map.png').convert()  # loading the map with the temp name given.
-button1 = create_button(game_map.map_width - 150, game_map.map_height - 50, 150, 50, 'Manual/Auto')
+auto_manual_button = create_button(game_map.map_width - 150, game_map.map_height - 50, 150, 50, 'Manual/Auto')
 # button in the right-down corner.
-button_list = [button1]  # a list containing all buttons
+button_list = [auto_manual_button]  # a list containing all buttons
 running = True  # simulation is running
 
 while running:
     clock.tick(FPS)
-    main_s.fill((0, 0, 0))
+    main_s.fill(BLACK)
     main_s.blit(sim_map, (0, 0))  # filling screen with map
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -84,16 +84,7 @@ while running:
     if drone.state.on_event('manual_control') == Model_States.ManualState:  # if we are in manual
         # TODO: a method for logging key pressings.
         key = pygame.key.get_pressed()
-        if key[pygame.K_LEFT]:
-            drone.left = True
-        if key[pygame.K_RIGHT]:
-            drone.right = True
-        if key[pygame.K_UP]:
-            drone.forward = True
-        if key[pygame.K_DOWN]:
-            drone.backward = True
-        if key[pygame.K_r]:
-            drone.angle = 0
+        drone.manual_press(key)
     elif drone.state.on_event('auto_control') == Model_States.AutoState: # if we are in auto state
         continue
     # TODO: implement autostate

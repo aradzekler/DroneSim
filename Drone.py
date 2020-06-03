@@ -1,11 +1,9 @@
 import math as math
 
 import easygui as eg  # https://github.com/robertlugg/easygui   - easy way to open file dialog and other gui things.
-import numpy as np
 import pygame
 from PIL import Image
 from pygame.color import THECOLORS
-from pygame.math import Vector2
 
 import Model_States
 
@@ -22,39 +20,6 @@ BLACK = (0, 0, 0)
 
 
 # https://www.pygame.org/project-Rect+Collision+Response-1061-.html
-
-
-# UNUSED CLASS FOR NOW.
-class Model:
-
-    def __init__(self, x, y):  # pos -> an [x,y] array of numbers
-        self.mass = 1.0  # total mass [kg]
-        self.air_dens = 1.2  # air density [kgm^-3], can defined how aerodynamic the drone is.
-        self.power_pre = 1.0  # battery power [power/100]
-        self.angle = 0.0  # angle of drone. in deg.
-        self.velocity = Vector2(0.0, 0.0)  # vertical , horizontal speed.
-        self.ro_rad = 0.20  # rotor radius [m]
-        self.length = 0.5  # drone have a diameter of 0.5m
-        self.ro_area = np.pi * self.ro_rad ** 2  # rotor total area [m^2]
-        self.position = Vector2(x, y)
-        self.state = Model_States.ManualState()  # the drone state, 0 is manual
-        self.type = "QUAD"  # drone type.
-        self.steer = 0.0
-        self.acceleration = 0.0
-
-    def update(self, dt):
-        self.velocity += (self.acceleration * dt, 0)
-        self.velocity.x = max(-MAX_VELOCITY, min(self.velocity.x, MAX_VELOCITY))
-
-        if self.state == 0:
-            if self.steer:
-                turn_radius = self.length / math.tan(math.radians(self.steer))
-                angular_velocity = self.velocity.x / turn_radius
-            else:
-                angular_velocity = 0
-
-            self.position += self.velocity.rotate(-self.angle) * dt
-            self.angle += math.degrees(angular_velocity) * dt
 
 
 # function for converting degrees to radians.
@@ -83,6 +48,16 @@ def get_track_or_not(reading):
 
 # our main drone class for now., getting a starting x and y coordinations, screen - pygame.display (our game
 # 'canvas'), gamemap - our Map object
+def get_rotated_point(x_1, y_1, x_2, y_2, angle):
+    radians = math.radians(angle)
+    # Rotate x_2, y_2 around x_1, y_1 by angle.
+    x_change = (x_2 - x_1) * math.cos(radians) + (y_2 - y_1) * math.sin(radians)
+    y_change = (y_1 - y_2) * math.cos(radians) - (x_1 - x_2) * math.sin(radians)
+    new_x = x_change + x_1
+    new_y = y_change + y_1
+    return int(new_x), int(new_y)
+
+
 class SimpleDrone:
     def __init__(self, x, y, screen, game_map):
         self.start_loc_y = 300
@@ -142,6 +117,18 @@ class SimpleDrone:
 
     def set_rect_y(self, y):
         self.rect.y = y
+
+    def manual_press(self, key):
+        if key[pygame.K_LEFT]:
+            self.left = True
+        if key[pygame.K_RIGHT]:
+            self.right = True
+        if key[pygame.K_UP]:
+            self.forward = True
+        if key[pygame.K_DOWN]:
+            self.backward = True
+        if key[pygame.K_r]:
+            self.angle = 0
 
     # resetting variables.
     def reset_data(self):
@@ -213,14 +200,6 @@ class SimpleDrone:
 
     # TODO: PROBLEM! something isnt right in the formula for calculating the angle
     # TODO: ALSO, 2 arms arent showing when switching x_change and y_change to radians
-    def get_rotated_point(self, x_1, y_1, x_2, y_2, angle):
-        radians = math.radians(angle)
-        # Rotate x_2, y_2 around x_1, y_1 by angle.
-        x_change = (x_2 - x_1) * math.cos(angle) + (y_2 - y_1) * math.sin(angle)
-        y_change = (y_1 - y_2) * math.cos(angle) - (x_1 - x_2) * math.sin(angle)
-        new_x = x_change + x_1
-        new_y = y_change + y_1
-        return int(new_x), int(new_y)
 
     # sonar detection function
     def get_arm_distance(self, arm, x, y, offset, screen):
@@ -232,7 +211,7 @@ class SimpleDrone:
             i += 1
 
             # Move the point to the right spot.
-            rotated_p = self.get_rotated_point(
+            rotated_p = get_rotated_point(
                 x, y, point[0], point[1], self.angle + offset)
 
             # Check if we've hit something. Return the current i (distance) if we did.
@@ -278,14 +257,13 @@ class Map:
         self.collide_list = []  # a list full of all the 'black spots'/walls
         self.count_white_b = 0  # for counting amount of blocks
         self.count_black_b = 0
-        map_path = eg.fileopenbox()  # opens a file choosing dialog.
+        self.map_path = eg.fileopenbox()  # opens a file choosing dialog.
+        self.map_array = []
 
-        # self.map_array = array([self.map_width][self.map_height])
-        with Image.open(map_path) as self.img:  # open the chosen map file as image.
+        with Image.open(self.map_path) as self.img:  # open the chosen map file as image.
             self.map_width, self.map_height = self.img.size  # size of map.
             rgb_image = self.img.convert("RGB")
 
-            self.map_array = []
             for i in range(self.map_width):
                 self.map_array.append([])
                 for j in range(self.map_height):
@@ -304,7 +282,8 @@ class Map:
             print('black blocks: ' + str(self.count_black_b), 'white blocks: ' + str(self.count_white_b))
             for x in range(self.map_width - 1):
                 for y in range(
-                        self.map_height - 1):  # for every black pixel, if there is a white pixel in his near enviroment, add to collide_list. if not, pass.
+                        self.map_height - 1):  # for every black pixel, if there is a white pixel in his near
+                    # environment, add to collide_list. if not, pass.
                     if ((self.map_array[x - 1][y - 1] == WHITE or self.map_array[x][y - 1] == WHITE or
                          self.map_array[x + 1][y - 1] == WHITE or
                          self.map_array[x - 1][y] == WHITE or self.map_array[x + 1][y + 1] == WHITE or
@@ -315,5 +294,4 @@ class Map:
                     else:
                         continue
             print('black blocks added to collision list: ' + str(len(self.collide_list)))
-
             self.img.save("new_map.png")
