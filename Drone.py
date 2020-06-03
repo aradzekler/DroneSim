@@ -168,9 +168,16 @@ class SimpleDrone:
         if self.forward:
             if self.current_speed < self.top_speed:
                 self.current_speed += self.acceleration
+        elif self.backward:
+            if self.top_speed > self.current_speed > 0:
+                self.current_speed -= self.acceleration
+            elif -self.top_speed < self.current_speed < 0:
+                self.current_speed -= self.acceleration
         else:
             if self.current_speed > 0:
                 self.current_speed -= self.deceleration
+            elif self.current_speed < 0:
+                self.current_speed += self.deceleration
             else:
                 self.current_speed = 0
         angle_rad = deg_to_rad(self.angle)
