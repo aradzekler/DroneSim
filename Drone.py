@@ -17,6 +17,8 @@ MAX_VELOCITY = 20
 BRAKE_DEACCELERATION = 10
 FREE_DEACCELERATION = 2
 MAX_STEERING_ANGLE = 30
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
 
 
 # https://www.pygame.org/project-Rect+Collision+Response-1061-.html
@@ -53,13 +55,6 @@ class Model:
 
             self.position += self.velocity.rotate(-self.angle) * dt
             self.angle += math.degrees(angular_velocity) * dt
-
-
-# collision detection function. receives the player rectangle and a collision blocks list
-def collide(player_rect, collide_list):
-    for block in collide_list:
-        if player_rect.colliderect(block):
-            return True
 
 
 # function for converting degrees to radians.
@@ -196,8 +191,9 @@ class SimpleDrone:
     def update(self):
         self.move_x = 0  # no momentum
         self.move_y = 0
-        if collide(self.rect, self.game_map.collide_list):
-            self.is_colliding = True
+        for block in self.game_map.collide_list:  # check for collisions
+            if self.rect.colliderect(block):
+                self.is_colliding = True
 
         self.rotate()
         self.move()
@@ -205,7 +201,7 @@ class SimpleDrone:
 
     # not ready
     def front_det(self):
-        if self.game_map[self.rect.x + 50][self.rect.y] == (0, 0, 0):
+        if self.game_map[self.rect.x + 50][self.rect.y] == BLACK:
             fuck = 0
 
     # TODO: PROBLEM! something isnt right in the formula for calculating the angle
@@ -235,7 +231,6 @@ class SimpleDrone:
             # Check if we've hit something. Return the current i (distance) if we did.
             if rotated_p[0] <= 0 or rotated_p[1] <= 0 \
                     or rotated_p[0] >= self.game_map.map_width or rotated_p[1] >= self.game_map.map_height:
-                print(i)
                 return i  # Sensor is off the screen.
             else:
                 obs = screen.get_at(rotated_p)
@@ -274,6 +269,8 @@ class Map:
         self.map_width = 0
         self.map_height = 0
         self.collide_list = []  # a list full of all the 'black spots'/walls
+        self.count_white_b = 0  # for counting amount of blocks
+        self.count_black_b = 0
         map_path = eg.fileopenbox()  # opens a file choosing dialog.
 
         # self.map_array = array([self.map_width][self.map_height])
@@ -289,11 +286,27 @@ class Map:
             for x in range(self.map_width):
                 for y in range(self.map_height):
                     rgb_pixel_value = rgb_image.getpixel((x, y))
-                    if rgb_pixel_value != (
-                            255, 255, 255):  # if not completly white, turn black (colored - walls, white - path)
-                        self.img.putpixel((x, y), (0, 0, 0))
+                    if rgb_pixel_value != WHITE:  # if not completly white
+                        self.img.putpixel((x, y), BLACK)  # turn black (colored - walls, white - path)
+                        self.map_array[x][y] = BLACK  # add black block to map array
+                        self.count_black_b += 1
+                    else:
+                        self.img.putpixel((x, y), WHITE)
+                        self.map_array[x][y] = WHITE
+                        self.count_white_b += 1
+            print('black blocks: ' + str(self.count_black_b), 'white blocks: ' + str(self.count_white_b))
+            for x in range(self.map_width - 1):
+                for y in range(
+                        self.map_height - 1):  # for every black pixel, if there is a white pixel in his near enviroment, add to collide_list. if not, pass.
+                    if ((self.map_array[x - 1][y - 1] == WHITE or self.map_array[x][y - 1] == WHITE or
+                         self.map_array[x + 1][y - 1] == WHITE or
+                         self.map_array[x - 1][y] == WHITE or self.map_array[x + 1][y + 1] == WHITE or
+                         self.map_array[x + 1][y] == WHITE or self.map_array[x - 1][y + 1] == WHITE or
+                         self.map_array[x][y + 1] == WHITE) and self.map_array[x][y] == BLACK):
                         self.block = pygame.Rect(x, y, 1, 1)
-                        self.collide_list.append(self.block)
-                        self.map_array[x][y] = (0, 0, 0)
-                    self.map_array[x][y] = (255, 255, 255)
+                        self.collide_list.append(self.block)  # add black block to our collide list
+                    else:
+                        continue
+            print('black blocks added to collision list: ' + str(len(self.collide_list)))
+
             self.img.save("new_map.png")

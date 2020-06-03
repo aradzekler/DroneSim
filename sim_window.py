@@ -39,6 +39,7 @@ def create_button(x, y, w, h, text):
 
 
 pygame.font.init()
+FPS = 30
 WHITE = (255, 255, 255)
 ACTIVE_BUTT_COLOR = pygame.Color('dodgerblue1')
 INACTIVE_BUTT_COLOR = pygame.Color('dodgerblue4')
@@ -46,7 +47,7 @@ FONT = pygame.font.Font(None, 30)
 clock = pygame.time.Clock()
 font = pygame.font.SysFont("", 20)
 pygame.init()  # initialize pygame window
-print("init")
+print("###########~~INIT SIMULATOR WINDOW~~###########")
 game_map = Map()  # setting map object, map choosing is inside the object.
 main_s = pygame.display.set_mode((game_map.map_width, game_map.map_height))  # our main display
 drone = SimpleDrone(100, 300, main_s, game_map)  # drone object, starting from coordinates 100,300
@@ -57,7 +58,7 @@ button_list = [button1]  # a list containing all buttons
 running = True  # simulation is running
 
 while running:
-    clock.tick(60)
+    clock.tick(FPS)
     main_s.fill((0, 0, 0))
     main_s.blit(sim_map, (0, 0))  # filling screen with map
     for event in pygame.event.get():
