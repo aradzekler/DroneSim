@@ -1,12 +1,14 @@
 from Drone import *
 
 
+# TODO: limit movement (drone get stuck in walls)
 # displaying the screen.
 def display_all(main_surface, display_list, text_list):
     for element in display_list:
         element.display(main_surface)
     for element_val in range(0, len(text_list)):  # adding text in the side of the screen
         main_surface.blit(font.render(str(text_list[element_val]), True, (0, 255, 0)), (10, 10 + (20 * element_val)))
+
 
 
 # update all elements in list.
