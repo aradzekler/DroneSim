@@ -10,7 +10,6 @@ def display_all(main_surface, display_list, text_list):
         main_surface.blit(font.render(str(text_list[element_val]), True, (0, 255, 0)), (10, 10 + (20 * element_val)))
 
 
-
 # update all elements in list.
 def update_all(update_list):
     for element in update_list:
@@ -73,7 +72,13 @@ while running:
                     # `event.pos` is the mouse position.
                     if button['rect'].collidepoint(event.pos):
                         # execute function in the state machine
-                        drone.state = drone.state.on_event('switch_state')
+                        # drone.state = drone.state.on_event('switch_state')
+                        if drone.event == 'manual_control':  # switch states
+                            drone.event = 'auto_control'
+                            drone.on_event('auto_control')
+                        else:
+                            drone.event = 'manual_control'
+                            drone.on_event('manual_control')
         elif event.type == pygame.MOUSEMOTION:
             # When the mouse gets moved, change the color of the
             # buttons if they collide with the mouse.
@@ -82,13 +87,9 @@ while running:
                     button['color'] = ACTIVE_BUTT_COLOR
                 else:
                     button['color'] = INACTIVE_BUTT_COLOR
-
-    if drone.state.on_event('manual_control') == Model_States.ManualState:  # if we are in manual
+    if drone.event == 'manual_control':  # if we are in manual control
+        drone.on_event('manual_control')
         # TODO: a method for logging key pressings.
-        key = pygame.key.get_pressed()
-        drone.manual_press(key)
-    elif drone.state.on_event('auto_control') == Model_States.AutoState: # if we are in auto state
-        continue
     # TODO: implement autostate
     # need to implement auto state
 

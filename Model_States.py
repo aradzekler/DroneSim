@@ -8,9 +8,7 @@ class ManualState(State):
 
     def on_event(self, event):
         if event == 'manual_control':
-            return ManualState
-        if event == 'switch_state':
-            return AutoState()
+            return ManualState()
         return self
 
 
@@ -21,8 +19,6 @@ class AutoState(State):
 
     def on_event(self, event):
         if event == 'auto_control':
-            return AutoState
-        if event == 'switch_state':
-            return ManualState()
+            return AutoState()
         return self
 # End of our states.

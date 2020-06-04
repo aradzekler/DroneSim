@@ -73,6 +73,7 @@ class SimpleDrone:
         manual_state = Model_States.ManualState()
         auto_state = Model_States.AutoState()
         self.state = manual_state  # the drone state
+        self.event = 'manual_control'
 
         self.front_detect_rect = self.rect  # drone front
 
@@ -109,6 +110,13 @@ class SimpleDrone:
         then assigned as the new state (inteface in Model_States.py.)
         """
         # The next state will be the result of the on_event function.
+
+        if event == 'manual_control':  # if we are in manual
+            key = pygame.key.get_pressed()
+            self.manual_press(key)
+        elif event == 'auto_control':  # if we are in auto state
+            print("")
+
         self.state = self.state.on_event(event)
 
     # setter methods for rectx and recty
@@ -118,6 +126,7 @@ class SimpleDrone:
     def set_rect_y(self, y):
         self.rect.y = y
 
+    # function from moving around with mouse clicks.
     def manual_press(self, key):
         if key[pygame.K_LEFT]:
             self.left = True
@@ -157,15 +166,15 @@ class SimpleDrone:
                 self.current_speed += self.acceleration
         elif self.backward:
             if self.top_speed > self.current_speed > 0:
-                self.current_speed -= self.acceleration
+                self.current_speed -= self.deceleration
             elif -self.top_speed < self.current_speed < 0:
                 self.current_speed -= self.acceleration
-        else:
+        else:  # TODO: BUG - Movement is shifting, prob because this paragraph
             if self.current_speed > 0:
                 self.current_speed -= self.deceleration
             elif self.current_speed < 0:
                 self.current_speed += self.deceleration
-            else:
+            elif 0.5 >= self.current_speed >= -0.5:
                 self.current_speed = 0
         angle_rad = deg_to_rad(self.angle)
         self.move_x = -(float(self.current_speed * math.sin(angle_rad)))
