@@ -126,7 +126,7 @@ class SimpleDrone:
     def set_rect_y(self, y):
         self.rect.y = y
 
-    # function from moving around with mouse clicks.
+    # function for moving around with mouse clicks.
     def manual_press(self, key):
         if key[pygame.K_LEFT]:
             self.left = True
@@ -169,13 +169,14 @@ class SimpleDrone:
                 self.current_speed -= self.deceleration
             elif -self.top_speed < self.current_speed < 0:
                 self.current_speed -= self.acceleration
-        else:  # TODO: BUG - Movement is shifting, prob because this paragraph
+        else:
             if self.current_speed > 0:
+                if self.current_speed < 0.5:
+                    self.current_speed = 0
                 self.current_speed -= self.deceleration
             elif self.current_speed < 0:
                 self.current_speed += self.deceleration
-            elif 0.5 >= self.current_speed >= -0.5:
-                self.current_speed = 0
+
         angle_rad = deg_to_rad(self.angle)
         self.move_x = -(float(self.current_speed * math.sin(angle_rad)))
         self.move_y = -(float(self.current_speed * math.cos(angle_rad)))
@@ -288,7 +289,7 @@ class Map:
                         self.img.putpixel((x, y), WHITE)
                         self.map_array[x][y] = WHITE
                         self.count_white_b += 1
-            print('black blocks: ' + str(self.count_black_b), 'white blocks: ' + str(self.count_white_b))
+            print('Wall (black) blocks: ' + str(self.count_black_b), 'Path (white) blocks: ' + str(self.count_white_b))
             for x in range(self.map_width - 1):
                 for y in range(
                         self.map_height - 1):  # for every black pixel, if there is a white pixel in his near
@@ -302,5 +303,5 @@ class Map:
                         self.collide_list.append(self.block)  # add black block to our collide list
                     else:
                         continue
-            print('black blocks added to collision list: ' + str(len(self.collide_list)))
+            print('Wall (black) blocks added to collision list: ' + str(len(self.collide_list)))
             self.img.save("new_map.png")

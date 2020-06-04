@@ -21,4 +21,3 @@ class AutoState(State):
         if event == 'auto_control':
             return AutoState()
         return self
-# End of our states.

@@ -1,5 +1,12 @@
 from Drone import *
 
+FPS = 30
+WHITE = (255, 255, 255)
+ACTIVE_BUTT_COLOR = pygame.Color('dodgerblue1')
+INACTIVE_BUTT_COLOR = pygame.Color('dodgerblue4')
+pygame.font.init()
+FONT = pygame.font.Font(None, 30)
+
 
 # TODO: limit movement (drone get stuck in walls)
 # displaying the screen.
@@ -39,12 +46,6 @@ def create_button(x, y, w, h, text):
     return button
 
 
-pygame.font.init()
-FPS = 30
-WHITE = (255, 255, 255)
-ACTIVE_BUTT_COLOR = pygame.Color('dodgerblue1')
-INACTIVE_BUTT_COLOR = pygame.Color('dodgerblue4')
-FONT = pygame.font.Font(None, 30)
 clock = pygame.time.Clock()
 font = pygame.font.SysFont("", 20)
 pygame.init()  # initialize pygame window
@@ -89,12 +90,13 @@ while running:
                     button['color'] = INACTIVE_BUTT_COLOR
     if drone.event == 'manual_control':  # if we are in manual control
         drone.on_event('manual_control')
-        # TODO: a method for logging key pressings.
+    # TODO: a method for logging key pressings.
     # TODO: implement autostate
     # need to implement auto state
 
     to_update = [drone]  # update drone variables
     to_display = [drone]  # update drone displaying on map.
+
     to_text = ["FPS: " + str("%.0f" % clock.get_fps()),  # our telemetry window.
                "Drone angle: " + str("%.2f" % drone.angle),
                "Current speed: " + str("%.2f" % drone.current_speed),
@@ -103,6 +105,7 @@ while running:
                "F key" + str(drone.forward),
                "L key" + str(drone.left),
                "R key" + str(drone.right),
+               "B key" + str(drone.backward),
                "Collided: " + str(drone.is_colliding)]
 
     for button in button_list:

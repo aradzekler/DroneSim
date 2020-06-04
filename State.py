@@ -6,7 +6,8 @@ class State(object):
     """
 
     def __init__(self):
-        print('Current state:', str(self))
+        # print('Current state:', str(self))
+        self.state = self
 
     def on_event(self, event):
         """
