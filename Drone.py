@@ -62,8 +62,9 @@ class SimpleDrone:
     def __init__(self, x, y, screen, game_map):
         self.start_loc_y = 300
         self.start_loc_x = 500
-        self.body = pygame.image.load("Images//Body//Grey.png").convert()  # images for the model itself.
-        self.rotors = pygame.image.load("Images//Wheels//Black.png").convert()
+
+        self.body = pygame.image.load("Images//quadrant.png").convert()  # images for the model itself.
+
         self.rect = self.body.get_rect()  # get rectangle the size of the body. our hitbox
         self.rect.x = x  # x location
         self.rect.y = y
@@ -155,9 +156,15 @@ class SimpleDrone:
             if self.angle < 0:
                 self.angle = 360
         if self.left:
-            self.angle += self.turn_speed * self.current_speed
+            if self.current_speed == 0: 
+                self.angle -= 5
+            else:    
+               self.angle += self.turn_speed * self.current_speed
         if self.right:
-            self.angle -= self.turn_speed * self.current_speed
+            if self.current_speed == 0: 
+                self.angle += 5
+            else:
+                self.angle -= self.turn_speed * self.current_speed
 
     # actual movement
     def move(self):
@@ -169,6 +176,7 @@ class SimpleDrone:
                 self.current_speed -= self.deceleration
             elif -self.top_speed < self.current_speed < 0:
                 self.current_speed -= self.acceleration
+     
         else:
             if self.current_speed > 0:
                 if self.current_speed < 0.5:
@@ -186,8 +194,6 @@ class SimpleDrone:
     # display the drone on the map.
     def display(self, main_surface):
         temp_image = pygame.transform.rotate(self.body, self.angle)
-        main_surface.blit(temp_image, (self.rect.x, self.rect.y))
-        temp_image = pygame.transform.rotate(self.rotors, self.angle)
         main_surface.blit(temp_image, (self.rect.x, self.rect.y))
         readings = self.get_sonar_readings(self.rect.x, self.rect.y, main_surface)
 
