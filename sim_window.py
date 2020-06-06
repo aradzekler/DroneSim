@@ -60,6 +60,8 @@ button_list = [auto_manual_button]  # a list containing all buttons
 running = True  # simulation is running
 
 while running:
+    
+        
     clock.tick(FPS)
     main_s.fill(BLACK)
     main_s.blit(sim_map, (0, 0))  # filling screen with map
@@ -93,23 +95,25 @@ while running:
     # TODO: a method for logging key pressings.
     # TODO: implement autostate
     # need to implement auto state
-
+   
     to_update = [drone]  # update drone variables
     to_display = [drone]  # update drone displaying on map.
 
     to_text = ["FPS: " + str("%.0f" % clock.get_fps()),  # our telemetry window.
-               "Drone angle: " + str("%.2f" % drone.angle),
-               "Current speed: " + str("%.2f" % drone.current_speed),
-               "X Axis Movement: " + str("%.2f" % drone.move_x),
-               "Y Axis movement: " + str("%.2f" % drone.move_y),
-               "F key" + str(drone.forward),
-               "L key" + str(drone.left),
-               "R key" + str(drone.right),
-               "B key" + str(drone.backward),
-               "Collided: " + str(drone.is_colliding)]
+            "Drone angle: " + str("%.2f" % drone.angle),
+            "Current speed: " + str("%.2f" % drone.current_speed),
+            "X Axis Movement: " + str("%.2f" % drone.move_x),
+            "Y Axis movement: " + str("%.2f" % drone.move_y),
+            "F key" + str(drone.forward),
+            "L key" + str(drone.left),
+            "R key" + str(drone.right),
+            "B key" + str(drone.backward),
+            "Collided: " + str(drone.is_colliding)]
 
     for button in button_list:
         draw_button(button, main_s)
-    update_all(to_update)
+    # If drone is collided stop all updates
+    if not drone.is_colliding:
+        update_all(to_update)
     display_all(main_s, to_display, to_text)
     pygame.display.flip()  # show the surface we created on the actual screen.

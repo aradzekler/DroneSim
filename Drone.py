@@ -165,7 +165,7 @@ class SimpleDrone:
             if self.current_speed < self.top_speed:
                 self.current_speed += self.acceleration
         elif self.backward:
-            if self.top_speed > self.current_speed > 0:
+            if self.top_speed > self.current_speed >= 0:
                 self.current_speed -= self.deceleration
             elif -self.top_speed < self.current_speed < 0:
                 self.current_speed -= self.acceleration
@@ -267,7 +267,9 @@ class Map:
         self.collide_list = []  # a list full of all the 'black spots'/walls
         self.count_white_b = 0  # for counting amount of blocks
         self.count_black_b = 0
-        self.map_path = eg.fileopenbox()  # opens a file choosing dialog.
+        # self.map_path = eg.fileopenbox()  # opens a file choosing dialog.
+        self.map_path = 'Images//p15.png' # opens a file choosing dialog.
+
         self.map_array = []
 
         with Image.open(self.map_path) as self.img:  # open the chosen map file as image.
