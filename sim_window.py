@@ -1,12 +1,14 @@
-from Drone import *
+import pygame
+from Drone import SimpleDrone
+from Map import Map
+from constants import BLACK ,WHITE 
 
 FPS = 30
-WHITE = (255, 255, 255)
 ACTIVE_BUTT_COLOR = pygame.Color('dodgerblue1')
 INACTIVE_BUTT_COLOR = pygame.Color('dodgerblue4')
+
 pygame.font.init()
 FONT = pygame.font.Font(None, 30)
-
 
 # TODO: limit movement (drone get stuck in walls)
 # displaying the screen.
