@@ -11,10 +11,6 @@ import Model_States
 # TODO: SET UP GUI BUTTONS.
 # lidar idea: translate map to black and white (did that) and draw a straight lines from out drone..
 
-MAX_VELOCITY = 20
-BRAKE_DEACCELERATION = 10
-FREE_DEACCELERATION = 2
-MAX_STEERING_ANGLE = 30
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
@@ -25,17 +21,6 @@ BLACK = (0, 0, 0)
 # function for converting degrees to radians.
 def deg_to_rad(deg):
     return deg / 180.0 * math.pi
-
-
-# adding a "sonar arm", which will detect movement in a straight line from origin
-def make_sonar_arm(x, y):
-    spread = 10  # Default spread.
-    sensor_distance = 15  # Gap before first sensor.
-    arm_points = []
-    for i in range(1, sensor_distance):
-        arm_points.append((x + (spread * i), y))
-
-    return arm_points
 
 
 # reads if the current reading is a wall or not.
@@ -49,19 +34,18 @@ def get_track_or_not(reading):
 # our main drone class for now., getting a starting x and y coordinations, screen - pygame.display (our game
 # 'canvas'), gamemap - our Map object
 def get_rotated_point(x_1, y_1, x_2, y_2, angle):
-    radians = math.radians(angle)
+    radians = deg_to_rad(angle)
     # Rotate x_2, y_2 around x_1, y_1 by angle.
-    x_change = (x_2 - x_1) * math.cos(radians) + (y_2 - y_1) * math.sin(radians)
-    y_change = (y_1 - y_2) * math.cos(radians) - (x_1 - x_2) * math.sin(radians)
+    x_change = (x_2 - x_1) * math.sin(radians) + (y_2 - y_1) * math.sin(radians)
+    y_change = (y_1 - y_2) * math.cos(radians) - (x_1 - x_2) * math.cos(radians)
     new_x = x_change + x_1
     new_y = y_change + y_1
+
     return int(new_x), int(new_y)
 
 
 class SimpleDrone:
     def __init__(self, x, y, screen, game_map):
-        self.start_loc_y = 300
-        self.start_loc_x = 500
         self.body = pygame.image.load("Images//Body//Grey.png").convert()  # images for the model itself.
         self.rotors = pygame.image.load("Images//Wheels//Black.png").convert()
         self.rect = self.body.get_rect()  # get rectangle the size of the body. our hitbox
@@ -152,12 +136,13 @@ class SimpleDrone:
         if self.angle > 360:
             self.angle = 0
         else:
-            if self.angle < 0:
+            if self.angle <= 0:
                 self.angle = 360
         if self.left:
-            self.angle += self.turn_speed * self.current_speed
+            self.angle += self.turn_speed
         if self.right:
-            self.angle -= self.turn_speed * self.current_speed
+            self.angle -= self.turn_speed
+            # self.angle -= self.turn_speed * self.current_speed
 
     # actual movement
     def move(self):
@@ -169,6 +154,8 @@ class SimpleDrone:
                 self.current_speed -= self.deceleration
             elif -self.top_speed < self.current_speed < 0:
                 self.current_speed -= self.acceleration
+            elif self.current_speed == 0:
+                self.current_speed -= self.acceleration
         else:
             if self.current_speed > 0:
                 if self.current_speed < 0.5:
@@ -178,18 +165,23 @@ class SimpleDrone:
                 self.current_speed += self.deceleration
 
         angle_rad = deg_to_rad(self.angle)
-        self.move_x = -(float(self.current_speed * math.sin(angle_rad)))
-        self.move_y = -(float(self.current_speed * math.cos(angle_rad)))
+        self.move_x = (float(self.current_speed * math.sin(angle_rad)))  # actual movement
+        self.move_y = (float(self.current_speed * math.cos(angle_rad)))
         self.rect.x += self.move_x
         self.rect.y += self.move_y
 
     # display the drone on the map.
     def display(self, main_surface):
-        temp_image = pygame.transform.rotate(self.body, self.angle)
-        main_surface.blit(temp_image, (self.rect.x, self.rect.y))
-        temp_image = pygame.transform.rotate(self.rotors, self.angle)
-        main_surface.blit(temp_image, (self.rect.x, self.rect.y))
-        readings = self.get_sonar_readings(self.rect.x, self.rect.y, main_surface)
+        body_image = pygame.transform.rotate(self.body, self.angle)
+        main_surface.blit(body_image, (self.rect.x, self.rect.y))
+
+        rotor_image = pygame.transform.rotate(self.rotors, self.angle)
+        main_surface.blit(rotor_image, (self.rect.x, self.rect.y))
+
+        readings = self.get_sonar_readings(main_surface)
+
+        if not get_track_or_not(readings):
+            print("fine")
 
     # updating function for movement
     def update(self):
@@ -209,7 +201,6 @@ class SimpleDrone:
             fuck = 0
 
     # TODO: PROBLEM! something isnt right in the formula for calculating the angle
-    # TODO: ALSO, 2 arms arent showing when switching x_change and y_change to radians
 
     # sonar detection function
     def get_arm_distance(self, arm, x, y, offset, screen):
@@ -222,41 +213,45 @@ class SimpleDrone:
 
             # Move the point to the right spot.
             rotated_p = get_rotated_point(
-                x, y, point[0], point[1], self.angle + offset)
+                self.rect.x, self.rect.y, point[0], point[1], self.angle + offset)
+            pygame.draw.circle(screen, (255, 0, 255), rotated_p, 2)  # drawing sonar arms.
 
-            # Check if we've hit something. Return the current i (distance) if we did.
+            # Check if we've hit something. Return the current i (distance) if we did. PART BELOW DOESNT WORK YET (DETECTION)
             if rotated_p[0] <= 0 or rotated_p[1] <= 0 \
                     or rotated_p[0] >= self.game_map.map_width or rotated_p[1] >= self.game_map.map_height:
                 return i  # Sensor is off the screen.
             else:
                 obs = screen.get_at(rotated_p)
-                if get_track_or_not(obs) != 0:
-                    return i
+                if get_track_or_not(obs) != 0 and self.show_sensors:
+                    continue
 
-            if self.show_sensors:
-                pygame.draw.circle(screen, (255, 0, 255), rotated_p, 2)
-
-        # Return the distance for the arm.
-        return i
+        return i  # Return the distance for the arm.
 
     # display arms on map
-    def get_sonar_readings(self, x, y, screen):
+    def get_sonar_readings(self, screen):
         readings = []
 
         # Make our arms.
-        arm_left = make_sonar_arm(x, y)
-        arm_middle = arm_left
-        arm_right = arm_left
+        arm_left = self.make_sonar_arm()
+        arm_middle = self.make_sonar_arm()
+        arm_right = self.make_sonar_arm()
 
-        # Rotate them and get readings.
-        readings.append(self.get_arm_distance(arm_left, x, y, 0.75, screen))
-        readings.append(self.get_arm_distance(arm_middle, x, y, 0, screen))
-        readings.append(self.get_arm_distance(arm_right, x, y, -0.75, screen))
-
-        if self.show_sensors:
-            pygame.display.update()
+        # Rotate them and get readings. (3 different sonar arms.)
+        readings.append(self.get_arm_distance(arm_left, self.rect.x, self.rect.y, 10.75, screen))
+        readings.append(self.get_arm_distance(arm_middle, self.rect.x, self.rect.y, 0, screen))
+        readings.append(self.get_arm_distance(arm_right, self.rect.x, self.rect.y, -10.75, screen))
 
         return readings
+
+    # adding a "sonar arm", which will detect movement in a straight line from origin
+    def make_sonar_arm(self):
+        spread = 10  # Default spread (distance between every sonar arm)
+        sensor_distance = 10  # distance of sensoring..
+        arm_points = []
+        for i in range(1, sensor_distance):
+            arm_points.append((self.rect.centerx + (spread * i), self.rect.centery))
+
+        return arm_points
 
 
 # Main class for dealing with out map.
