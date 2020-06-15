@@ -93,6 +93,7 @@ class SimpleDrone:
         delegated to the given states which then handle the event. The result is
         then assigned as the new state (inteface in Model_States.py.)
         """
+        
         # The next state will be the result of the on_event function.
 
         if event == 'manual_control':  # if we are in manual
