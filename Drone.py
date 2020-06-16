@@ -13,6 +13,7 @@ import Model_States
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
+D_BLACK = (0, 0, 0, 255)
 
 
 # https://www.pygame.org/project-Rect+Collision+Response-1061-.html
@@ -59,15 +60,13 @@ class SimpleDrone:
         self.state = manual_state  # the drone state
         self.event = 'manual_control'
 
-        self.front_detect_rect = self.rect  # drone front
-
+        self.front_detect = False  # drone front.
         # self.driving_direction = Vec2d(1, 0).rotated(self.angle)
 
         # sensors
         self.front_detection_lidar = False  # forward LIDAR
         self.show_sensors = True
         self.lidar_sensor_range = 50
-        self.front_detect_rect.x += self.lidar_sensor_range
 
         # movement states for easy movement capturing.
         self.forward = False
@@ -93,7 +92,7 @@ class SimpleDrone:
         delegated to the given states which then handle the event. The result is
         then assigned as the new state (inteface in Model_States.py.)
         """
-        
+
         # The next state will be the result of the on_event function.
 
         if event == 'manual_control':  # if we are in manual
@@ -130,7 +129,7 @@ class SimpleDrone:
         self.right = False
         self.forward = False
         self.backward = False
-        self.front_detection_lidar = False
+        self.front_detect = False
 
     # Rotation movement angle.
     def rotate(self):
@@ -211,20 +210,24 @@ class SimpleDrone:
         # Look at each point and see if we've hit something.
         for point in arm:
             i += 1
-
             # Move the point to the right spot.
             rotated_p = get_rotated_point(
                 self.rect.x, self.rect.y, point[0], point[1], self.angle + offset)
-            pygame.draw.circle(screen, (255, 0, 255), rotated_p, 2)  # drawing sonar arms.
-
-            # Check if we've hit something. Return the current i (distance) if we did. PART BELOW DOESNT WORK YET (DETECTION)
+            pygame.draw.circle(screen, (255, 0, 255), rotated_p, 1)  # drawing sonar arms.
+            rotated_list_p = list(rotated_p)
+            rotated_list_p[0] += 1  # nasty workaround to change the tuple rotated_p value in order to 'see' the white
+            # and not purple.
+            rotated_p = tuple(rotated_list_p)
+            # Check if we've hit something.
             if rotated_p[0] <= 0 or rotated_p[1] <= 0 \
-                    or rotated_p[0] >= self.game_map.map_width or rotated_p[1] >= self.game_map.map_height:
-                return i  # Sensor is off the screen.
-            else:
+                    or rotated_p[0] >= self.game_map.map_width or rotated_p[
+                1] >= self.game_map.map_height:  # Sensor is off the screen.
+                self.front_detect = True
+                return i
+            else:  # if we are not offscrean.
                 obs = screen.get_at(rotated_p)
-                if get_track_or_not(obs) != 0 and self.show_sensors:
-                    continue
+                if obs == D_BLACK and self.show_sensors:
+                    self.front_detect = True
 
         return i  # Return the distance for the arm.
 

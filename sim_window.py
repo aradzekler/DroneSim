@@ -106,7 +106,8 @@ while running:
                "L key" + str(drone.left),
                "R key" + str(drone.right),
                "B key" + str(drone.backward),
-               "Collided: " + str(drone.is_colliding)]
+               "Collided: " + str(drone.is_colliding),
+               "Collision Detected: " + str(drone.front_detect)]
 
     for button in button_list:
         draw_button(button, main_s)
