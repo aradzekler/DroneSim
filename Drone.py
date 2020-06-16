@@ -3,17 +3,16 @@ import math as math
 import easygui as eg  # https://github.com/robertlugg/easygui   - easy way to open file dialog and other gui things.
 import pygame
 from PIL import Image
-from pygame.color import THECOLORS
 
 import Model_States
 
 # TODO: ADD LIDARS, ADD AI, GENERICS
 # TODO: SET UP GUI BUTTONS.
-# lidar idea: translate map to black and white (did that) and draw a straight lines from out drone..
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 D_BLACK = (0, 0, 0, 255)
+SENSOR_RANGE = 10
 
 
 # https://www.pygame.org/project-Rect+Collision+Response-1061-.html
@@ -22,14 +21,6 @@ D_BLACK = (0, 0, 0, 255)
 # function for converting degrees to radians.
 def deg_to_rad(deg):
     return deg / 180.0 * math.pi
-
-
-# reads if the current reading is a wall or not.
-def get_track_or_not(reading):
-    if reading == THECOLORS['black']:
-        return 0
-    else:
-        return 1
 
 
 # our main drone class for now., getting a starting x and y coordinations, screen - pygame.display (our game
@@ -64,9 +55,7 @@ class SimpleDrone:
         # self.driving_direction = Vec2d(1, 0).rotated(self.angle)
 
         # sensors
-        self.front_detection_lidar = False  # forward LIDAR
         self.show_sensors = True
-        self.lidar_sensor_range = 50
 
         # movement states for easy movement capturing.
         self.forward = False
@@ -142,7 +131,8 @@ class SimpleDrone:
             self.angle += self.turn_speed
         if self.right:
             self.angle -= self.turn_speed
-            # self.angle -= self.turn_speed * self.current_speed
+            # self.angle -= self.turn_speed * self.current_speed - this was used for a smoother motion (car like and
+            # not drone like)
 
     # actual movement
     def move(self):
@@ -178,10 +168,7 @@ class SimpleDrone:
         rotor_image = pygame.transform.rotate(self.rotors, self.angle)
         main_surface.blit(rotor_image, (self.rect.x, self.rect.y))
 
-        readings = self.get_sonar_readings(main_surface)
-
-        if not get_track_or_not(readings):
-            print("fine")
+        self.get_sonar_readings(main_surface)
 
     # updating function for movement
     def update(self):
@@ -194,13 +181,6 @@ class SimpleDrone:
         self.rotate()
         self.move()
         self.reset_data()
-
-    # not ready
-    def front_det(self):
-        if self.game_map[self.rect.x + 50][self.rect.y] == BLACK:
-            fuck = 0
-
-    # TODO: PROBLEM! something isnt right in the formula for calculating the angle
 
     # sonar detection function
     def get_arm_distance(self, arm, x, y, offset, screen):
@@ -250,9 +230,8 @@ class SimpleDrone:
     # adding a "sonar arm", which will detect movement in a straight line from origin
     def make_sonar_arm(self):
         spread = 10  # Default spread (distance between every sonar arm)
-        sensor_distance = 10  # distance of sensoring..
         arm_points = []
-        for i in range(1, sensor_distance):
+        for i in range(0, SENSOR_RANGE):
             arm_points.append((self.rect.centerx + (spread * i), self.rect.centery))
 
         return arm_points
