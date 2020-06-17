@@ -23,19 +23,6 @@ def deg_to_rad(deg):
     return deg / 180.0 * math.pi
 
 
-# our main drone class for now., getting a starting x and y coordinations, screen - pygame.display (our game
-# 'canvas'), gamemap - our Map object
-def get_rotated_point(x_1, y_1, x_2, y_2, angle):
-    radians = deg_to_rad(angle)
-    # Rotate x_2, y_2 around x_1, y_1 by angle.
-    x_change = (x_2 - x_1) * math.sin(radians) + (y_2 - y_1) * math.sin(radians)
-    y_change = (y_1 - y_2) * math.cos(radians) - (x_1 - x_2) * math.cos(radians)
-    new_x = x_change + x_1
-    new_y = y_change + y_1
-
-    return int(new_x), int(new_y)
-
-
 class SimpleDrone:
     def __init__(self, x, y, screen, game_map):
         self.body = pygame.image.load("Images//Body//Grey.png").convert()  # images for the model itself.
@@ -49,6 +36,7 @@ class SimpleDrone:
         auto_state = Model_States.AutoState()
         self.state = manual_state  # the drone state
         self.event = 'manual_control'
+        self.drone_track = {(self.rect.x, self.rect.y)}  # a set for tracking our drones coordinates around the map.
 
         # self.driving_direction = Vec2d(1, 0).rotated(self.angle)
 
@@ -158,6 +146,8 @@ class SimpleDrone:
         self.move_y = (float(self.current_speed * math.cos(angle_rad)))
         self.rect.x += self.move_x
         self.rect.y += self.move_y
+
+        self.drone_track.add((self.rect.x, self.rect.y))
         # self.get_sonar_readings(self.screen)
 
     # display the drone on the map.
@@ -193,7 +183,7 @@ class SimpleDrone:
         for point in arm:
             i += 1
             # Move the point to the right spot.
-            rotated_p = get_rotated_point(
+            rotated_p = self.get_rotated_point(
                 self.rect.x, self.rect.y, point[0], point[1], self.angle + offset)
             pygame.draw.circle(screen, (255, 0, 255), rotated_p, 1)  # drawing sonar arms.
             rotated_list_p = list(rotated_p)
@@ -234,9 +224,21 @@ class SimpleDrone:
         spread = 10  # Default spread (distance between every sonar arm)
         arm_points = []
         for i in range(0, SENSOR_RANGE):
-            arm_points.append((10 + self.rect.x + (spread * i), self.rect.y))
+            arm_points.append((self.rect.x + (spread * i), self.rect.y))
 
         return arm_points
+
+    # our main drone class for now., getting a starting x and y coordinations, screen - pygame.display (our game
+    # 'canvas'), gamemap - our Map object
+    def get_rotated_point(self, x_1, y_1, x_2, y_2, angle):
+        radians = deg_to_rad(angle)
+        # Rotate x_2, y_2 around x_1, y_1 by angle.
+        x_change = (x_2 - x_1) * math.sin(radians) + (y_2 - y_1) * math.sin(radians)
+        y_change = (y_1 - y_2) * math.cos(radians) - (x_1 - x_2) * math.cos(radians)
+        new_x = x_change + x_1
+        new_y = y_change + y_1
+
+        return int(new_x), int(new_y)
 
 
 # Main class for dealing with out map.

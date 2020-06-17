@@ -1,6 +1,6 @@
 from Drone import *
 
-FPS = 30
+FPS = 20
 WHITE = (255, 255, 255)
 ACTIVE_BUTT_COLOR = pygame.Color('dodgerblue1')
 INACTIVE_BUTT_COLOR = pygame.Color('dodgerblue4')
@@ -61,7 +61,7 @@ running = True  # simulation is running
 
 while running:
     clock.tick(FPS)
-    main_s.fill(BLACK)
+    main_s.fill(BLACK)  # resets the map every loop.
     main_s.blit(sim_map, (0, 0))  # filling screen with map
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -93,6 +93,9 @@ while running:
     # TODO: a method for logging key pressings.
     # TODO: implement autostate
     # need to implement auto state
+
+    for coordinate in drone.drone_track:  # painting a red track.
+        pygame.draw.circle(main_s, (255, 0, 0), coordinate, 1)
 
     to_update = [drone]  # update drone variables
     to_display = [drone]  # update drone displaying on map.
