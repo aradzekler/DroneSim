@@ -45,17 +45,16 @@ class SimpleDrone:
         self.rect.y = y
         self.game_map = game_map
         self.screen = screen
-        self.rect.center = self.rect.x, self.rect.y  # center point of our drone
         manual_state = Model_States.ManualState()
         auto_state = Model_States.AutoState()
         self.state = manual_state  # the drone state
         self.event = 'manual_control'
 
-        self.front_detect = False  # drone front.
         # self.driving_direction = Vec2d(1, 0).rotated(self.angle)
 
         # sensors
         self.show_sensors = True
+        self.front_detect = False  # drone front.
 
         # movement states for easy movement capturing.
         self.forward = False
@@ -159,6 +158,7 @@ class SimpleDrone:
         self.move_y = (float(self.current_speed * math.cos(angle_rad)))
         self.rect.x += self.move_x
         self.rect.y += self.move_y
+        # self.get_sonar_readings(self.screen)
 
     # display the drone on the map.
     def display(self, main_surface):
@@ -169,6 +169,8 @@ class SimpleDrone:
         main_surface.blit(rotor_image, (self.rect.x, self.rect.y))
 
         self.get_sonar_readings(main_surface)
+        self.rect.x, self.rect.y = self.rect.center
+        self.rect.center = (self.rect.x, self.rect.y)
 
     # updating function for movement
     def update(self):
@@ -232,7 +234,7 @@ class SimpleDrone:
         spread = 10  # Default spread (distance between every sonar arm)
         arm_points = []
         for i in range(0, SENSOR_RANGE):
-            arm_points.append((self.rect.centerx + (spread * i), self.rect.centery))
+            arm_points.append((10 + self.rect.x + (spread * i), self.rect.y))
 
         return arm_points
 
