@@ -55,8 +55,9 @@ main_s = pygame.display.set_mode((game_map.map_width, game_map.map_height))  # o
 drone = SimpleDrone(100, 300, main_s, game_map)  # drone object, starting from coordinates 100,300
 sim_map = pygame.image.load('new_map.png').convert()  # loading the map with the temp name given.
 auto_manual_button = create_button(game_map.map_width - 150, game_map.map_height - 50, 150, 50, 'Manual/Auto')
+track_button = create_button(game_map.map_width - 150, game_map.map_height - (100 + 1), 150, 50, 'Track')
 # button in the right-down corner.
-button_list = [auto_manual_button]  # a list containing all buttons
+button_list = [auto_manual_button, track_button]  # a list containing all buttons
 running = True  # simulation is running
 
 while running:
@@ -74,12 +75,18 @@ while running:
                     if button['rect'].collidepoint(event.pos):
                         # execute function in the state machine
                         # drone.state = drone.state.on_event('switch_state')
-                        if drone.event == 'manual_control':  # switch states
-                            drone.event = 'auto_control'
-                            drone.on_event('auto_control')
-                        else:
-                            drone.event = 'manual_control'
-                            drone.on_event('manual_control')
+                        if button == button_list[0]:  # manual/auto button
+                            if drone.event == 'manual_control':  # switch states
+                                drone.event = 'auto_control'
+                                drone.on_event('auto_control')
+                            else:
+                                drone.event = 'manual_control'
+                                drone.on_event('manual_control')
+                        if button == button_list[1]:  # tracking on/off button
+                            if drone.tracking:
+                                drone.tracking = False
+                            else:
+                                drone.tracking = True
         elif event.type == pygame.MOUSEMOTION:
             # When the mouse gets moved, change the color of the
             # buttons if they collide with the mouse.
@@ -94,8 +101,6 @@ while running:
     # TODO: implement autostate
     # need to implement auto state
 
-    for coordinate in drone.drone_track:  # painting a red track.
-        pygame.draw.circle(main_s, (255, 0, 0), coordinate, 1)
 
     to_update = [drone]  # update drone variables
     to_display = [drone]  # update drone displaying on map.

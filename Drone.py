@@ -11,6 +11,9 @@ import Model_States
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
 D_BLACK = (0, 0, 0, 255)
 SENSOR_RANGE = 10
 
@@ -28,28 +31,29 @@ class SimpleDrone:
         self.body = pygame.image.load("Images//Body//Grey.png").convert()  # images for the model itself.
         self.rotors = pygame.image.load("Images//Wheels//Black.png").convert()
         self.rect = self.body.get_rect()  # get rectangle the size of the body. our hitbox
-        self.rect.x = x  # x location
-        self.rect.y = y
+        self.rect.x = self.body.get_rect().width / 2 + x  # x location
+        self.rect.y = self.body.get_rect().height / 2 + y
         self.game_map = game_map
         self.screen = screen
         manual_state = Model_States.ManualState()
         auto_state = Model_States.AutoState()
         self.state = manual_state  # the drone state
         self.event = 'manual_control'
-        self.drone_track = {(self.rect.x, self.rect.y)}  # a set for tracking our drones coordinates around the map.
-
-        # self.driving_direction = Vec2d(1, 0).rotated(self.angle)
 
         # sensors
         self.show_sensors = True
         self.front_detect = False  # drone front.
+        self.tracking = True
+        self.sensor_x_relative = self.body.get_rect().width / 2  # the relative location of the sensor.
+        self.sensor_y_relative = self.body.get_rect().height / 2
+        self.drone_track = {(self.rect.x + int(self.sensor_x_relative), self.rect.y + int(self.sensor_y_relative),
+                             BLUE)}  # a set for tracking our drones coordinates around the map.
 
         # movement states for easy movement capturing.
         self.forward = False
         self.backward = False
         self.left = False
         self.right = False
-        self.angle = 0
         self.is_colliding = False  # collision detection param
 
         # navigation variables.
@@ -61,6 +65,7 @@ class SimpleDrone:
         self.current_speed = 0
         self.move_x = 0
         self.move_y = 0
+        self.angle = 0
 
     def on_event(self, event):
         """
@@ -114,12 +119,16 @@ class SimpleDrone:
         else:
             if self.angle <= 0:
                 self.angle = 360
-        if self.left:
-            self.angle += self.turn_speed
-        if self.right:
-            self.angle -= self.turn_speed
-            # self.angle -= self.turn_speed * self.current_speed - this was used for a smoother motion (car like and
-            # not drone like)
+        if self.current_speed == 0:  # rotate in spot.
+            if self.left:
+                self.angle += self.turn_speed
+            if self.right:
+                self.angle -= self.turn_speed
+        else:
+            if self.left:
+                self.angle += self.turn_speed * self.current_speed
+            if self.right:
+                self.angle -= self.turn_speed * self.current_speed
 
     # actual movement
     def move(self):
@@ -147,7 +156,6 @@ class SimpleDrone:
         self.rect.x += self.move_x
         self.rect.y += self.move_y
 
-        self.drone_track.add((self.rect.x, self.rect.y))
         # self.get_sonar_readings(self.screen)
 
     # display the drone on the map.
@@ -170,21 +178,30 @@ class SimpleDrone:
             if self.rect.colliderect(block):
                 self.is_colliding = True
 
+        if self.tracking and self.is_colliding:  # if tracking in on
+            self.drone_track.add((self.rect.x + int(self.sensor_x_relative), self.rect.y + int(self.sensor_y_relative),
+                                  RED))  # if collided add red track
+        elif self.tracking:
+            self.drone_track.add(
+                (self.rect.x + int(self.sensor_x_relative), self.rect.y + int(self.sensor_y_relative),
+                 BLUE))  # if not, add blue
+        for coordinate in self.drone_track:  # painting our tracking
+            pygame.draw.circle(self.screen, coordinate[2], (coordinate[0], coordinate[1]), 1)  # draw the circle in
+            # the coordinates with the coordinates color
         self.rotate()
         self.move()
         self.reset_data()
 
     # sonar detection function
-    def get_arm_distance(self, arm, x, y, offset, screen):
-        # Used to count the distance.
-        i = 0
-
+    def get_arm_distance(self, arm, offset, screen):
+        i = 0  # Used to count the distance.
         # Look at each point and see if we've hit something.
         for point in arm:
             i += 1
             # Move the point to the right spot.
             rotated_p = self.get_rotated_point(
-                self.rect.x, self.rect.y, point[0], point[1], self.angle + offset)
+                self.rect.x + self.sensor_x_relative, self.rect.y + self.sensor_y_relative, point[0], point[1],
+                self.angle + offset)
             pygame.draw.circle(screen, (255, 0, 255), rotated_p, 1)  # drawing sonar arms.
             rotated_list_p = list(rotated_p)
             rotated_list_p[0] += 1  # nasty workaround to change the tuple rotated_p value in order to 'see' the white
@@ -213,9 +230,9 @@ class SimpleDrone:
         arm_right = self.make_sonar_arm()
 
         # Rotate them and get readings. (3 different sonar arms.)
-        readings.append(self.get_arm_distance(arm_left, self.rect.x, self.rect.y, 10.75, screen))
-        readings.append(self.get_arm_distance(arm_middle, self.rect.x, self.rect.y, 0, screen))
-        readings.append(self.get_arm_distance(arm_right, self.rect.x, self.rect.y, -10.75, screen))
+        readings.append(self.get_arm_distance(arm_left, 10.75, screen))
+        readings.append(self.get_arm_distance(arm_middle, 0, screen))
+        readings.append(self.get_arm_distance(arm_right, -10.75, screen))
 
         return readings
 
@@ -224,7 +241,8 @@ class SimpleDrone:
         spread = 10  # Default spread (distance between every sonar arm)
         arm_points = []
         for i in range(0, SENSOR_RANGE):
-            arm_points.append((self.rect.x + (spread * i), self.rect.y))
+            arm_points.append(
+                (self.rect.x + self.sensor_x_relative + (spread * i), self.rect.y + self.sensor_y_relative))
 
         return arm_points
 
