@@ -51,6 +51,7 @@ font = pygame.font.SysFont("", 20)
 pygame.init()  # initialize pygame window
 print("###########~~INIT SIMULATOR WINDOW~~###########")
 game_map = Map()  # setting map object, map choosing is inside the object.
+game_map.create_map_from_img()
 main_s = pygame.display.set_mode((game_map.map_width, game_map.map_height))  # our main display
 drone = SimpleDrone(100, 300, main_s, game_map)  # drone object, starting from coordinates 100,300
 sim_map = pygame.image.load('new_map.png').convert()  # loading the map with the temp name given.
@@ -100,7 +101,6 @@ while running:
     # TODO: a method for logging key pressings.
     # TODO: implement autostate
     # need to implement auto state
-
 
     to_update = [drone]  # update drone variables
     to_display = [drone]  # update drone displaying on map.

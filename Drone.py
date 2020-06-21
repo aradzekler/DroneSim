@@ -26,6 +26,17 @@ def deg_to_rad(deg):
     return deg / 180.0 * math.pi
 
 
+def get_rotated_point(x_1, y_1, x_2, y_2, angle):
+    radians = deg_to_rad(angle)
+    # Rotate x_2, y_2 around x_1, y_1 by angle.
+    x_change = (x_2 - x_1) * math.sin(radians) + (y_2 - y_1) * math.sin(radians)
+    y_change = (y_1 - y_2) * math.cos(radians) - (x_1 - x_2) * math.cos(radians)
+    new_x = x_change + x_1
+    new_y = y_change + y_1
+
+    return int(new_x), int(new_y)
+
+
 class SimpleDrone:
     def __init__(self, x, y, screen, game_map):
         self.body = pygame.image.load("Images//Body//Grey.png").convert()  # images for the model itself.
@@ -71,7 +82,7 @@ class SimpleDrone:
         """
         This is the bread and butter of the state machine. Incoming events are
         delegated to the given states which then handle the event. The result is
-        then assigned as the new state (inteface in Model_States.py.)
+        then assigned as the new state (interface in Model_States.py.)
         """
 
         # The next state will be the result of the on_event function.
@@ -199,7 +210,7 @@ class SimpleDrone:
         for point in arm:
             i += 1
             # Move the point to the right spot.
-            rotated_p = self.get_rotated_point(
+            rotated_p = get_rotated_point(
                 self.rect.x + self.sensor_x_relative, self.rect.y + self.sensor_y_relative, point[0], point[1],
                 self.angle + offset)
             pygame.draw.circle(screen, (255, 0, 255), rotated_p, 1)  # drawing sonar arms.
@@ -209,9 +220,8 @@ class SimpleDrone:
             rotated_p = tuple(rotated_list_p)
             # Check if we've hit something.
             if rotated_p[0] <= 0 or rotated_p[1] <= 0 \
-                    or rotated_p[0] >= self.game_map.map_width or rotated_p[
-                1] >= self.game_map.map_height:  # Sensor is off the screen.
-                self.front_detect = True
+                    or rotated_p[0] >= self.game_map.map_width or rotated_p[1] >= self.game_map.map_height:
+                self.front_detect = True  # Sensor is off the screen.
                 return i
             else:  # if we are not offscrean.
                 obs = screen.get_at(rotated_p)
@@ -224,7 +234,7 @@ class SimpleDrone:
     def get_sonar_readings(self, screen):
         readings = []
 
-        # Make our arms.
+        # Make our sensor 'arms;'.
         arm_left = self.make_sonar_arm()
         arm_middle = self.make_sonar_arm()
         arm_right = self.make_sonar_arm()
@@ -241,22 +251,13 @@ class SimpleDrone:
         spread = 10  # Default spread (distance between every sonar arm)
         arm_points = []
         for i in range(0, SENSOR_RANGE):
-            arm_points.append(
+            arm_points.append(  # painting the 'dots' of the arm relative to our drone location
                 (self.rect.x + self.sensor_x_relative + (spread * i), self.rect.y + self.sensor_y_relative))
 
         return arm_points
 
     # our main drone class for now., getting a starting x and y coordinations, screen - pygame.display (our game
     # 'canvas'), gamemap - our Map object
-    def get_rotated_point(self, x_1, y_1, x_2, y_2, angle):
-        radians = deg_to_rad(angle)
-        # Rotate x_2, y_2 around x_1, y_1 by angle.
-        x_change = (x_2 - x_1) * math.sin(radians) + (y_2 - y_1) * math.sin(radians)
-        y_change = (y_1 - y_2) * math.cos(radians) - (x_1 - x_2) * math.cos(radians)
-        new_x = x_change + x_1
-        new_y = y_change + y_1
-
-        return int(new_x), int(new_y)
 
 
 # Main class for dealing with out map.
@@ -270,9 +271,10 @@ class Map:
         self.map_path = eg.fileopenbox()  # opens a file choosing dialog.
         self.map_array = []
 
-        with Image.open(self.map_path) as self.img:  # open the chosen map file as image.
-            self.map_width, self.map_height = self.img.size  # size of map.
-            rgb_image = self.img.convert("RGB")
+    def create_map_from_img(self):
+        with Image.open(self.map_path) as img:  # open the chosen map file as image.
+            self.map_width, self.map_height = img.size  # size of map.
+            rgb_image = img.convert("RGB")
 
             for i in range(self.map_width):
                 self.map_array.append([])
@@ -282,14 +284,15 @@ class Map:
                 for y in range(self.map_height):
                     rgb_pixel_value = rgb_image.getpixel((x, y))
                     if rgb_pixel_value != WHITE:  # if not completly white
-                        self.img.putpixel((x, y), BLACK)  # turn black (colored - walls, white - path)
+                        img.putpixel((x, y), BLACK)  # turn black (colored - walls, white - path)
                         self.map_array[x][y] = BLACK  # add black block to map array
                         self.count_black_b += 1
                     else:
-                        self.img.putpixel((x, y), WHITE)
+                        img.putpixel((x, y), WHITE)
                         self.map_array[x][y] = WHITE
                         self.count_white_b += 1
-            print('Wall (black) blocks: ' + str(self.count_black_b), 'Path (white) blocks: ' + str(self.count_white_b))
+            print('Wall (black) blocks: ' + str(self.count_black_b),
+                  'Path (white) blocks: ' + str(self.count_white_b))
             for x in range(self.map_width - 1):
                 for y in range(
                         self.map_height - 1):  # for every black pixel, if there is a white pixel in his near
@@ -299,9 +302,9 @@ class Map:
                          self.map_array[x - 1][y] == WHITE or self.map_array[x + 1][y + 1] == WHITE or
                          self.map_array[x + 1][y] == WHITE or self.map_array[x - 1][y + 1] == WHITE or
                          self.map_array[x][y + 1] == WHITE) and self.map_array[x][y] == BLACK):
-                        self.block = pygame.Rect(x, y, 1, 1)
-                        self.collide_list.append(self.block)  # add black block to our collide list
+                        block = pygame.Rect(x, y, 1, 1)
+                        self.collide_list.append(block)  # add black block to our collide list
                     else:
                         continue
             print('Wall (black) blocks added to collision list: ' + str(len(self.collide_list)))
-            self.img.save("new_map.png")
+            img.save("new_map.png")
