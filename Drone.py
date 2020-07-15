@@ -5,7 +5,6 @@ import pygame
 import Model_States
 
 # TODO: ADD LIDARS, ADD AI, GENERICS
-# TODO: SET UP GUI BUTTONS.
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
