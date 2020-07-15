@@ -1,6 +1,6 @@
-from Drone import *
 import datetime
-import csv
+
+from Map import *
 
 FPS = 30
 ACTIVE_BUTT_COLOR = pygame.Color('dodgerblue1')
