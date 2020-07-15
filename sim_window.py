@@ -1,7 +1,8 @@
 from Drone import *
+import datetime
+import csv
 
-FPS = 20
-WHITE = (255, 255, 255)
+FPS = 30
 ACTIVE_BUTT_COLOR = pygame.Color('dodgerblue1')
 INACTIVE_BUTT_COLOR = pygame.Color('dodgerblue4')
 pygame.font.init()
@@ -55,14 +56,25 @@ game_map.create_map_from_img()
 main_s = pygame.display.set_mode((game_map.map_width, game_map.map_height))  # our main display
 drone = SimpleDrone(100, 300, main_s, game_map)  # drone object, starting from coordinates 100,300
 sim_map = pygame.image.load('new_map.png').convert()  # loading the map with the temp name given.
-auto_manual_button = create_button(game_map.map_width - 150, game_map.map_height - 50, 150, 50, 'Manual/Auto')
-track_button = create_button(game_map.map_width - 150, game_map.map_height - (100 + 1), 150, 50, 'Track')
+
+# button creation
+auto_manual_button = create_button(game_map.map_width - 180, game_map.map_height - 50, 180, 50, 'Manual/Auto')
+track_button = create_button(game_map.map_width - 180, game_map.map_height - (100 + 1), 180, 50, 'Track')
+pause_button = create_button(game_map.map_width - 180, game_map.map_height - (150 + 2), 180, 50, 'Quit')
+log_button = create_button(game_map.map_width - 180, game_map.map_height - (200 + 3), 180, 50, 'Toggle CsvLogging')
 # button in the right-down corner.
-button_list = [auto_manual_button, track_button]  # a list containing all buttons
+button_list = [auto_manual_button, track_button, pause_button, log_button]  # a list containing all buttons
+
+pygame.time.set_timer(pygame.USEREVENT, 1000)
+time = datetime.datetime.min
 running = True  # simulation is running
+logging = False
+log_file = ""  # if logging is needed.
 
 while running:
     clock.tick(FPS)
+    time += datetime.timedelta(0, (FPS / 10))
+
     main_s.fill(BLACK)  # resets the map every loop.
     main_s.blit(sim_map, (0, 0))  # filling screen with map
     for event in pygame.event.get():
@@ -88,6 +100,15 @@ while running:
                                 drone.tracking = False
                             else:
                                 drone.tracking = True
+                        if button == button_list[2]:  # quit button
+                            if running:
+                                csv_f = open('csvfile.csv', 'w')  # handling logging to csv file before closing.
+                                csv_f.write(log_file)
+                                csv_f.close()
+                                running = False
+                        if button == button_list[3]:
+                            if not logging:
+                                logging = True
         elif event.type == pygame.MOUSEMOTION:
             # When the mouse gets moved, change the color of the
             # buttons if they collide with the mouse.
@@ -115,7 +136,22 @@ while running:
                "R key" + str(drone.right),
                "B key" + str(drone.backward),
                "Collided: " + str(drone.is_colliding),
-               "Collision Detected: " + str(drone.front_detect)]
+               "Collision Detected: " + str(drone.front_detect),
+               "Time: " + str('{0:%H:%M:%S}'.format(time))]
+
+    to_log = [str("%.0f" % clock.get_fps()),  # our telemetry window.
+              str("%.2f" % drone.angle), str("%.2f" % drone.current_speed), str("%.2f" % drone.move_x),
+              str("%.2f" % drone.move_y), str(drone.forward), str(drone.left), str(drone.right), str(drone.backward),
+              str(drone.is_colliding), str(drone.front_detect), str('{0:%H:%M:%S}'.format(time))]
+
+    # HANDLING CSV LOGGING
+    if logging:
+        line = ""
+        for text in to_text:
+            line += text + ","
+        line = line[:-1]
+        line += "\n"
+        log_file += line
 
     for button in button_list:
         draw_button(button, main_s)
