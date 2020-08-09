@@ -52,10 +52,8 @@ def get_rotated_point(x_1, y_1, x_2, y_2, angle):
 
 class SimpleDrone:
     def __init__(self, x, y, screen, game_map):
-        self.start_loc_y = 300
-        self.start_loc_x = 500
-
-        self.body = pygame.image.load("Images//quadrant.png").convert()  # images for the model itself.
+    
+        self.body = pygame.image.load("Images//circle.png").convert()  # images for the model itself.
 
         self.rect = self.body.get_rect()  # get rectangle the size of the body. our hitbox
         self.rect.x = x  # x location
@@ -64,7 +62,6 @@ class SimpleDrone:
         self.screen = screen
         self.rect.center = self.rect.x, self.rect.y  # center point of our drone
         manual_state = Model_States.ManualState()
-        auto_state = Model_States.AutoState()
         self.state = manual_state  # the drone state
         self.event = 'manual_control'
 
@@ -149,12 +146,12 @@ class SimpleDrone:
                 self.angle = 360
         if self.left:
             if self.current_speed == 0: 
-                self.angle -= 5
+                self.angle += 5
             else:    
                self.angle += self.turn_speed * self.current_speed
         if self.right:
             if self.current_speed == 0: 
-                self.angle += 5
+                self.angle -= 5
             else:
                 self.angle -= self.turn_speed * self.current_speed
 
@@ -187,73 +184,21 @@ class SimpleDrone:
     def display(self, main_surface):
         temp_image = pygame.transform.rotate(self.body, self.angle)
         main_surface.blit(temp_image, (self.rect.x, self.rect.y))
-        readings = self.get_sonar_readings(self.rect.x, self.rect.y, main_surface)
+        # readings = self.get_sonar_readings(self.rect.x, self.rect.y, main_surface)
+
 
     # updating function for movement
     def update(self):
         self.move_x = 0  # no momentum
         self.move_y = 0
-        for block in self.game_map.collide_list:  # check for collisions
-            if self.rect.colliderect(block):
-                self.is_colliding = True
-
+        
         self.rotate()
         self.move()
         self.reset_data()
 
-    # not ready
-    def front_det(self):
-        if self.game_map[self.rect.x + 50][self.rect.y] == BLACK:
-            fuck = 0
 
     # TODO: PROBLEM! something isnt right in the formula for calculating the angle
     # TODO: ALSO, 2 arms arent showing when switching x_change and y_change to radians
 
-    # sonar detection function
-    def get_arm_distance(self, arm, x, y, offset, screen):
-        # Used to count the distance.
-        i = 0
-
-        # Look at each point and see if we've hit something.
-        for point in arm:
-            i += 1
-
-            # Move the point to the right spot.
-            rotated_p = get_rotated_point(
-                x, y, point[0], point[1], self.angle + offset)
-
-            # Check if we've hit something. Return the current i (distance) if we did.
-            if rotated_p[0] <= 0 or rotated_p[1] <= 0 \
-                    or rotated_p[0] >= self.game_map.map_width or rotated_p[1] >= self.game_map.map_height:
-                return i  # Sensor is off the screen.
-            else:
-                obs = screen.get_at(rotated_p)
-                if get_track_or_not(obs) != 0:
-                    return i
-
-            if self.show_sensors:
-                pygame.draw.circle(screen, (255, 0, 255), rotated_p, 2)
-
-        # Return the distance for the arm.
-        return i
-
-    # display arms on map
-    def get_sonar_readings(self, x, y, screen):
-        readings = []
-
-        # Make our arms.
-        arm_left = make_sonar_arm(x, y)
-        arm_middle = arm_left
-        arm_right = arm_left
-
-        # Rotate them and get readings.
-        readings.append(self.get_arm_distance(arm_left, x, y, 0.75, screen))
-        readings.append(self.get_arm_distance(arm_middle, x, y, 0, screen))
-        readings.append(self.get_arm_distance(arm_right, x, y, -0.75, screen))
-
-        if self.show_sensors:
-            pygame.display.update()
-
-        return readings
 
 

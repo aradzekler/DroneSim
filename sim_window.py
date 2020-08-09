@@ -1,16 +1,19 @@
 import pygame
-from Drone import SimpleDrone
+import math as math
+
+from Drone import SimpleDrone,deg_to_rad
+from Sensor import Sensor
 from Map import Map
-from constants import BLACK ,WHITE 
+from constants import BLACK ,WHITE ,RED
 
 FPS = 30
 ACTIVE_BUTT_COLOR = pygame.Color('dodgerblue1')
 INACTIVE_BUTT_COLOR = pygame.Color('dodgerblue4')
-
+RED1 = pygame.Color('red')
 pygame.font.init()
 FONT = pygame.font.Font(None, 30)
 
-# TODO: limit movement (drone get stuck in walls)
+# TODO: limit movement (drone get stuck in walls) - Done
 # displaying the screen.
 def display_all(main_surface, display_list, text_list):
     for element in display_list:
@@ -60,10 +63,13 @@ auto_manual_button = create_button(game_map.map_width - 150, game_map.map_height
 # button in the right-down corner.
 button_list = [auto_manual_button]  # a list containing all buttons
 running = True  # simulation is running
+size = width, sensorLength = (1, 100)
+line_surface = pygame.Surface([100,100], pygame.SRCALPHA, 32)
+# line_surface = line_surface.convert_alpha()
+
 
 while running:
-    
-        
+     
     clock.tick(FPS)
     main_s.fill(BLACK)
     main_s.blit(sim_map, (0, 0))  # filling screen with map
@@ -97,7 +103,11 @@ while running:
     # TODO: a method for logging key pressings.
     # TODO: implement autostate
     # need to implement auto state
-   
+
+    
+    # line_surface.fill(INACTIVE_BUTT_COLOR)
+  
+
     to_update = [drone]  # update drone variables
     to_display = [drone]  # update drone displaying on map.
 
@@ -115,7 +125,30 @@ while running:
     for button in button_list:
         draw_button(button, main_s)
     # If drone is collided stop all updates
-    if not drone.is_colliding:
-        update_all(to_update)
+    # if not drone.is_colliding:
+    #     update_all(to_update)
+
+    update_all(to_update)
     display_all(main_s, to_display, to_text)
+
+    #draw sensors
+    sensor = Sensor(main_s, drone.rect.center, 1,drone.angle)
+    sensor.update()
+
+
+
+    angle_rad = deg_to_rad(drone.angle)
+    x = drone.rect.center[0] - (sensorLength * float(math.cos(angle_rad)))
+    y = drone.rect.center[1] - (sensorLength * float(math.sin(angle_rad)))
+    
+    drawStartPoint = (x,y)
+    # line_surface.fill((255,0,0))
+    # pygame.draw.line(line_surface, (255,0,0), drawStartPoint, drone.rect.center,4)  # Start at topleft and ends at bottomright.
+    # main_s.blit(line_surface, (drone.rect.center[0] - line_surface.get_width() // 2, drone.rect.center[1] - line_surface.get_height() // 2 - 50)) 
+
+    # drawStartPoint = (drone.rect.center[0] , drone.rect.center[1] - sensorLength)
+    # pygame.draw.line(line_surface, RED, drawStartPoint, drone.rect.center)  # Start at topleft and ends at bottomright.
+    # main_s.blit(line_surface, drawStartPoint )
+
+
     pygame.display.flip()  # show the surface we created on the actual screen.
