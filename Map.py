@@ -50,5 +50,6 @@ class Map:
                         self.collide_list.append(block)  # add black block to our collide list
                     else:
                         continue
+                        
             print('Wall (black) blocks added to collision list: ' + str(len(self.collide_list)))
             img.save("new_map.png")
