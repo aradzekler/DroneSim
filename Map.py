@@ -52,4 +52,4 @@ class Map:
                         continue
                         
             print('Wall (black) blocks added to collision list: ' + str(len(self.collide_list)))
-            img.save("new_map.png")
+            img.save(".img/new_map.png")
