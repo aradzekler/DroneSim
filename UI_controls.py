@@ -11,7 +11,10 @@ class UI_Controls:
         self.game_map = game_map
         self.main_s = main_s
         self.drone = drone
+        self.scene_metrics = []
        
+       
+        pygame.time.set_timer(pygame.USEREVENT, 1000)
         pygame.font.init()
         self.font = pygame.font.SysFont("", 20)
         self.FONT = pygame.font.Font(None, 30)
@@ -31,13 +34,9 @@ class UI_Controls:
         pygame.draw.rect(screen, button['color'], button['rect'])
         screen.blit(button['text'], button['text rect'])
 
-    def set_buttons(self):
+    def draw_buttons(self):
         for button in self.button_list:
             self.draw_button(button, self.main_s)
-
-    def display_all(self,scene_metrics):
-        for element_val in range(0, len(scene_metrics)):  # adding text in the side of the screen
-            self.main_s.blit(self.font.render(str(scene_metrics[element_val]), True, (0, 255, 0)), (10, 10 + (20 * element_val)))
 
 
     def trigger_event_listeners(self):
@@ -98,8 +97,8 @@ class UI_Controls:
         }
         return button
 
-    def set_metrics(self,clock,time):
-        return ["FPS: " + str("%.0f" % clock.get_fps()),  # our telemetry window.
+    def update_metrics(self,clock,time):
+        self.scene_metrics = ["FPS: " + str("%.0f" % clock.get_fps()),  # our telemetry window.
                     "Drone angle: " + str("%.2f" % self.drone.angle),
                     "Current speed: " + str("%.2f" % self.drone.current_speed),
                     "X Axis Movement: " + str("%.2f" % self.drone.move_x),
@@ -112,4 +111,9 @@ class UI_Controls:
                     "Collision Detected: " + str(self.drone.front_detect),
                     "Time: " + str('{0:%H:%M:%S}'.format(time))]
 
+
+    def draw_metrics(self,clock,time):
+        self.update_metrics(clock,time)
+        for element_val in range(0, len(self.scene_metrics)):  # adding text in the side of the screen
+            self.main_s.blit(self.font.render(str(self.scene_metrics[element_val]), True, (0, 255, 0)), (10, 10 + (20 * element_val)))
 

@@ -31,14 +31,14 @@ def get_rotated_point(x_1, y_1, x_2, y_2, angle):
 
 
 class Drone:
-    def __init__(self, x, y, screen, game_map):
+    def __init__(self, x, y, main_s, game_map):
         self.body = pygame.image.load("Images//Body//Grey.png").convert()  # images for the model itself.
         self.rotors = pygame.image.load("Images//Wheels//Black.png").convert()
         self.rect = self.body.get_rect()  # get rectangle the size of the body. our hitbox
         self.rect.x = self.body.get_rect().width / 2 + x  # x location
         self.rect.y = self.body.get_rect().height / 2 + y
         self.game_map = game_map
-        self.screen = screen
+        self.main_s = main_s
         manual_state = Model_States.ManualState()
         auto_state = Model_States.AutoState()
         self.state = manual_state  # the drone state
@@ -165,9 +165,9 @@ class Drone:
 
     
     # display the drone on the map.
-    def display(self, main_surface):
+    def display(self):
         body_image = pygame.transform.rotate(self.body, self.angle)
-        main_surface.blit(body_image, (self.rect.x, self.rect.y))
+        self.main_s.blit(body_image, (self.rect.x, self.rect.y))
         # self.blitRotate(main_surface,self.body,(self.rect.x, self.rect.y),(self.rect.x, self.rect.y),self.angle)
 
         # loc = self.body.get_rect().center  #rot_image is not defined 
@@ -178,7 +178,7 @@ class Drone:
         # rotor_image = pygame.transform.rotate(self.rotors, self.angle)
         # main_surface.blit(rotor_image, (self.rect.x, self.rect.y))
 
-        self.get_sonar_readings(main_surface)
+        self.get_sonar_readings(self.main_s)
         # self.rect.x, self.rect.y = self.rect.center
         # self.rect.center = (self.rect.x, self.rect.y)
 
@@ -225,7 +225,7 @@ class Drone:
                 (self.rect.x + int(self.sensor_x_relative), self.rect.y + int(self.sensor_y_relative),
                  BLUE))  # if not, add blue
         for coordinate in self.drone_track:  # painting our tracking
-            pygame.draw.circle(self.screen, coordinate[2], (coordinate[0], coordinate[1]), 1)  # draw the circle in
+            pygame.draw.circle(self.main_s, coordinate[2], (coordinate[0], coordinate[1]), 1)  # draw the circle in
             # the coordinates with the coordinates color
         self.rotate()
         self.move()

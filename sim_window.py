@@ -8,23 +8,21 @@ import constants
 from Drone import Drone
 from Map import Map
 from UI_controls import UI_Controls
+from UI_metrics import UI_metrics
 from Logger import Logger
 
-def update_drone(to_update):
-    for element in to_update:
+def update_all(elements):
+    for element in elements:
         element.update()
     
 # TODO: limit movement (drone get stuck in walls)
 # displaying the screen.
-def display_all(main_surface, display_list, scene_metrics,ui_control):
-    for element in display_list:
-        element.display(main_surface)
+def display_all(elements):
+    for element in elements:
+        element.display()
 
-    ui_control.display_all(scene_metrics)
-
-
-# creating a simple button in pygame
 clock = pygame.time.Clock()
+time = datetime.datetime.min
 
 pygame.init()  # initialize pygame window
 print("###########~~INIT SIMULATOR WINDOW~~###########")
@@ -41,11 +39,12 @@ main_s = pygame.display.set_mode((game_map.map_width, game_map.map_height))  # o
 drone = Drone(100, 300, main_s, game_map)  # drone object, starting from coordinates 100,300
 sim_map = pygame.image.load(constants.TMP_MAP_PATH).convert()  # loading the map with the temp name given.
 
-pygame.time.set_timer(pygame.USEREVENT, 1000)
-time = datetime.datetime.min
+
 running = True  # simulation is running
 
 ui_controls = UI_Controls(game_map,main_s,drone)
+ui_metrics= UI_metrics(main_s,drone,clock,time)
+
 logger = Logger()
 
 while running:
@@ -62,15 +61,16 @@ while running:
     # TODO: implement autostate
     # need to implement auto state
 
-    to_update = [drone]  # update drone variables
-    to_display = [drone]  # update drone displaying on map.
+    # to_update = [drone]  # update drone variables
+    # to_display = [drone]  # update drone displaying on map.
 
-    scene_metrics = ui_controls.set_metrics(clock,time)
-    ui_controls.set_buttons()
+    # ui_controls.draw_metrics(clock,time)
+    # ui_controls.draw_buttons()
+
+    update_all([drone,ui_metrics])
+    display_all([drone,ui_metrics])
 
     log_line = logger.log(drone,clock,time)
-    update_drone(to_update)
 
-    display_all(main_s, to_display, scene_metrics,ui_controls)
     pygame.display.flip()  # show the surface we created on the actual screen.
 
