@@ -5,12 +5,13 @@ import constants
 ACTIVE_BUTTON_COLOR = pygame.Color('dodgerblue1')
 INACTIVE_BUTTON_COLOR = pygame.Color('dodgerblue4')
 
-class UI_Controls:
+class UI_controls:
     def __init__(self,game_map,main_s,drone):
         self.update_list = []
         self.game_map = game_map
         self.main_s = main_s
         self.drone = drone
+        # self.play_game_callback = play_game_callback
         self.scene_metrics = []
        
        
@@ -34,7 +35,10 @@ class UI_Controls:
         pygame.draw.rect(screen, button['color'], button['rect'])
         screen.blit(button['text'], button['text rect'])
 
-    def draw_buttons(self):
+    def update(self):
+        self.trigger_event_listeners()
+
+    def display(self):
         for button in self.button_list:
             self.draw_button(button, self.main_s)
 
@@ -42,7 +46,8 @@ class UI_Controls:
     def trigger_event_listeners(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running = False
+                a = True
+                # self.play_game_callback(False)
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 # 1 is the left mouse button, 2 is middle, 3 is right.
                 if event.button == 1:
@@ -64,11 +69,13 @@ class UI_Controls:
                                 else:
                                     self.drone.tracking = True
                             if button == self.button_list[2]:  # quit button
-                                if running:
-                                    csv_f = open('csvfile.csv', 'w')  # handling logging to csv file before closing.
-                                    csv_f.write(log_file)
-                                    csv_f.close()
-                                    running = False
+                                a = True
+                                # self.play_game_callback(False)
+                                # if running:
+                                #     csv_f = open('csvfile.csv', 'w')  # handling logging to csv file before closing.
+                                #     csv_f.write(log_file)
+                                #     csv_f.close()
+                                #     running = False
                             if button == self.button_list[3]:
                                 if not logging:
                                     logging = True
@@ -96,24 +103,3 @@ class UI_Controls:
             'color': INACTIVE_BUTTON_COLOR,
         }
         return button
-
-    def update_metrics(self,clock,time):
-        self.scene_metrics = ["FPS: " + str("%.0f" % clock.get_fps()),  # our telemetry window.
-                    "Drone angle: " + str("%.2f" % self.drone.angle),
-                    "Current speed: " + str("%.2f" % self.drone.current_speed),
-                    "X Axis Movement: " + str("%.2f" % self.drone.move_x),
-                    "Y Axis movement: " + str("%.2f" % self.drone.move_y),
-                    "F key" + str(self.drone.forward),
-                    "L key" + str(self.drone.left),
-                    "R key" + str(self.drone.right),
-                    "B key" + str(self.drone.backward),
-                    "Collided: " + str(self.drone.is_colliding),
-                    "Collision Detected: " + str(self.drone.front_detect),
-                    "Time: " + str('{0:%H:%M:%S}'.format(time))]
-
-
-    def draw_metrics(self,clock,time):
-        self.update_metrics(clock,time)
-        for element_val in range(0, len(self.scene_metrics)):  # adding text in the side of the screen
-            self.main_s.blit(self.font.render(str(self.scene_metrics[element_val]), True, (0, 255, 0)), (10, 10 + (20 * element_val)))
-
