@@ -1,13 +1,9 @@
-import math as math
-
 import pygame
-
+import math as math
 import Model_States
 
 # TODO: ADD LIDARS, ADD AI, GENERICS
 
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
@@ -34,7 +30,7 @@ def get_rotated_point(x_1, y_1, x_2, y_2, angle):
     return int(new_x), int(new_y)
 
 
-class SimpleDrone:
+class Drone:
     def __init__(self, x, y, screen, game_map):
         self.body = pygame.image.load("Images//Body//Grey.png").convert()  # images for the model itself.
         self.rotors = pygame.image.load("Images//Wheels//Black.png").convert()

@@ -1,8 +1,6 @@
+import pygame
 import constants
 from PIL import Image
-
-from Drone import *
-
 
 # Main class for dealing with out map.
 class Map:
@@ -17,7 +15,7 @@ class Map:
         """
         Take png image and create proper black and white image
         Also generate collision list
-        The collision list is used for -------FILL INN
+        The collision list is used for proper wall detection
         """
         
         map_array = []
@@ -56,7 +54,7 @@ class Map:
                          map_array[x + 1][y - 1] == constants.WHITE or
                          map_array[x - 1][y] == constants.WHITE or map_array[x + 1][y + 1] == constants.WHITE or
                          map_array[x + 1][y] == constants.WHITE or map_array[x - 1][y + 1] == constants.WHITE or
-                         map_array[x][y + 1] == constants.WHITE) and map_array[x][y] == BLACK):
+                         map_array[x][y + 1] == constants.WHITE) and map_array[x][y] == constants.BLACK):
                         block = pygame.Rect(x, y, 1, 1)
                         self.collide_list.append(block)  # add black block to our collide list
                     else:
