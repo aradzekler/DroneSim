@@ -10,7 +10,10 @@ from Map import Map
 from UI_controls import UI_Controls
 from Logger import Logger
 
-
+def update_drone(to_update):
+    for element in to_update:
+        element.update()
+    
 # TODO: limit movement (drone get stuck in walls)
 # displaying the screen.
 def display_all(main_surface, display_list, scene_metrics,ui_control):
@@ -38,7 +41,6 @@ main_s = pygame.display.set_mode((game_map.map_width, game_map.map_height))  # o
 drone = Drone(100, 300, main_s, game_map)  # drone object, starting from coordinates 100,300
 sim_map = pygame.image.load(constants.TMP_MAP_PATH).convert()  # loading the map with the temp name given.
 
-
 pygame.time.set_timer(pygame.USEREVENT, 1000)
 time = datetime.datetime.min
 running = True  # simulation is running
@@ -53,7 +55,8 @@ while running:
     main_s.fill(constants.BLACK)  # resets the map every loop.
     main_s.blit(sim_map, (0, 0))  # filling screen with map
 
-    ui_controls.set_event_listeners(drone)
+    # react to button/mouse/key press
+    ui_controls.trigger_event_listeners()
     
     # TODO: a method for logging key pressings.
     # TODO: implement autostate
@@ -62,12 +65,12 @@ while running:
     to_update = [drone]  # update drone variables
     to_display = [drone]  # update drone displaying on map.
 
-    scene_metrics = ui_controls.set_metrics(drone,clock,time)
+    scene_metrics = ui_controls.set_metrics(clock,time)
+    ui_controls.set_buttons()
+
     log_line = logger.log(drone,clock,time)
-    ui_controls.update_all(to_update)
+    update_drone(to_update)
 
     display_all(main_s, to_display, scene_metrics,ui_controls)
     pygame.display.flip()  # show the surface we created on the actual screen.
-
-
 

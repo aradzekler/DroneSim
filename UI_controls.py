@@ -23,11 +23,6 @@ class UI_Controls:
         # button in the right-down corner.
 
         self.button_list = [auto_manual_button, track_button, pause_button, log_button]  # a list containing all butto
-     
-        for button in self.button_list:
-            self.draw_button(button, self.main_s)
-
-        self.set_event_listeners(self.drone)
 
 
     # drawing the button on pygame canvas.
@@ -36,19 +31,16 @@ class UI_Controls:
         pygame.draw.rect(screen, button['color'], button['rect'])
         screen.blit(button['text'], button['text rect'])
 
-
-    # update all elements in list.
-    def update_all(self,to_update ):
-        for element in to_update  :
-            element.update()
-
+    def set_buttons(self):
+        for button in self.button_list:
+            self.draw_button(button, self.main_s)
 
     def display_all(self,scene_metrics):
         for element_val in range(0, len(scene_metrics)):  # adding text in the side of the screen
             self.main_s.blit(self.font.render(str(scene_metrics[element_val]), True, (0, 255, 0)), (10, 10 + (20 * element_val)))
 
 
-    def set_event_listeners(self,drone):
+    def trigger_event_listeners(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -61,17 +53,17 @@ class UI_Controls:
                             # execute function in the state machine
                             # drone.state = drone.state.on_event('switch_state')
                             if button == self.button_list[0]:  # manual/auto button
-                                if drone.event == 'manual_control':  # switch states
-                                    drone.event = 'auto_control'
-                                    drone.on_event('auto_control')
+                                if self.drone.event == 'manual_control':  # switch states
+                                    self.drone.event = 'auto_control'
+                                    self.drone.on_event('auto_control')
                                 else:
-                                    drone.event = 'manual_control'
-                                    drone.on_event('manual_control')
+                                    self.drone.event = 'manual_control'
+                                    self.drone.on_event('manual_control')
                             if button == self.button_list[1]:  # tracking on/off button
-                                if drone.tracking:
-                                    drone.tracking = False
+                                if self.drone.tracking:
+                                    self.drone.tracking = False
                                 else:
-                                    drone.tracking = True
+                                    self.drone.tracking = True
                             if button == self.button_list[2]:  # quit button
                                 if running:
                                     csv_f = open('csvfile.csv', 'w')  # handling logging to csv file before closing.
@@ -89,8 +81,8 @@ class UI_Controls:
                         button['color'] = ACTIVE_BUTTON_COLOR
                     else:
                         button['color'] = INACTIVE_BUTTON_COLOR
-        if drone.event == 'manual_control':  # if we are in manual control
-            drone.on_event('manual_control')
+        if self.drone.event == 'manual_control':  # if we are in manual control
+            self.drone.on_event('manual_control')
 
     def create_button(self,x, y, w, h, text):
         # The button is a dictionary consisting of the rect, text,
@@ -106,18 +98,18 @@ class UI_Controls:
         }
         return button
 
-    def set_metrics(self,drone,clock,time):
+    def set_metrics(self,clock,time):
         return ["FPS: " + str("%.0f" % clock.get_fps()),  # our telemetry window.
-                    "Drone angle: " + str("%.2f" % drone.angle),
-                    "Current speed: " + str("%.2f" % drone.current_speed),
-                    "X Axis Movement: " + str("%.2f" % drone.move_x),
-                    "Y Axis movement: " + str("%.2f" % drone.move_y),
-                    "F key" + str(drone.forward),
-                    "L key" + str(drone.left),
-                    "R key" + str(drone.right),
-                    "B key" + str(drone.backward),
-                    "Collided: " + str(drone.is_colliding),
-                    "Collision Detected: " + str(drone.front_detect),
+                    "Drone angle: " + str("%.2f" % self.drone.angle),
+                    "Current speed: " + str("%.2f" % self.drone.current_speed),
+                    "X Axis Movement: " + str("%.2f" % self.drone.move_x),
+                    "Y Axis movement: " + str("%.2f" % self.drone.move_y),
+                    "F key" + str(self.drone.forward),
+                    "L key" + str(self.drone.left),
+                    "R key" + str(self.drone.right),
+                    "B key" + str(self.drone.backward),
+                    "Collided: " + str(self.drone.is_colliding),
+                    "Collision Detected: " + str(self.drone.front_detect),
                     "Time: " + str('{0:%H:%M:%S}'.format(time))]
 
 
