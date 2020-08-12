@@ -1,6 +1,9 @@
 import datetime
+import constants
+import easygui as eg  # https://github.com/robertlugg/easygui   - easy way to open file dialog and other gui things.
 
 from Map import *
+
 
 FPS = 30
 ACTIVE_BUTT_COLOR = pygame.Color('dodgerblue1')
@@ -51,11 +54,18 @@ clock = pygame.time.Clock()
 font = pygame.font.SysFont("", 20)
 pygame.init()  # initialize pygame window
 print("###########~~INIT SIMULATOR WINDOW~~###########")
-game_map = Map()  # setting map object, map choosing is inside the object.
+
+
+# TODO: Enable for map selection dialog and remove constant 
+# map_image_path = eg.fileopenbox()  # opens a file choosing dialog.
+map_image_path = constants.MAP_IMAGE_PATH
+
+game_map = Map(map_image_path)  # setting map object, map choosing is inside the object.
+
 game_map.create_map_from_img()
 main_s = pygame.display.set_mode((game_map.map_width, game_map.map_height))  # our main display
 drone = SimpleDrone(100, 300, main_s, game_map)  # drone object, starting from coordinates 100,300
-sim_map = pygame.image.load('new_map.png').convert()  # loading the map with the temp name given.
+sim_map = pygame.image.load(constants.TMP_MAP_PATH).convert()  # loading the map with the temp name given.
 
 # button creation
 auto_manual_button = create_button(game_map.map_width - 180, game_map.map_height - 50, 180, 50, 'Manual/Auto')

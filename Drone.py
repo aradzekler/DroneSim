@@ -166,17 +166,52 @@ class SimpleDrone:
 
         # self.get_sonar_readings(self.screen)
 
+
+    
     # display the drone on the map.
     def display(self, main_surface):
         body_image = pygame.transform.rotate(self.body, self.angle)
         main_surface.blit(body_image, (self.rect.x, self.rect.y))
+        # self.blitRotate(main_surface,self.body,(self.rect.x, self.rect.y),(self.rect.x, self.rect.y),self.angle)
 
-        rotor_image = pygame.transform.rotate(self.rotors, self.angle)
-        main_surface.blit(rotor_image, (self.rect.x, self.rect.y))
+        # loc = self.body.get_rect().center  #rot_image is not defined 
+        # rot_sprite = pygame.transform.rotate(self.body, self.angle)
+        # rot_sprite.get_rect().center = loc
+        # main_surface.blit(rot_sprite, (self.rect.x, self.rect.y))
+
+        # rotor_image = pygame.transform.rotate(self.rotors, self.angle)
+        # main_surface.blit(rotor_image, (self.rect.x, self.rect.y))
 
         self.get_sonar_readings(main_surface)
-        self.rect.x, self.rect.y = self.rect.center
-        self.rect.center = (self.rect.x, self.rect.y)
+        # self.rect.x, self.rect.y = self.rect.center
+        # self.rect.center = (self.rect.x, self.rect.y)
+
+
+    # def blitRotate(self,surf, image, pos, originPos, angle):
+    #     # calcaulate the axis aligned bounding box of the rotated image
+    #     w, h       = image.get_size()
+    #     box        = [pygame.math.Vector2(p) for p in [(0, 0), (w, 0), (w, -h), (0, -h)]]
+    #     box_rotate = [p.rotate(angle) for p in box]
+    #     min_box    = (min(box_rotate, key=lambda p: p[0])[0], min(box_rotate, key=lambda p: p[1])[1])
+    #     max_box    = (max(box_rotate, key=lambda p: p[0])[0], max(box_rotate, key=lambda p: p[1])[1])
+
+    #     # calculate the translation of the pivot 
+    #     pivot        = pygame.math.Vector2(originPos[0], -originPos[1])
+    #     pivot_rotate = pivot.rotate(angle)
+    #     pivot_move   = pivot_rotate - pivot
+
+    #     # calculate the upper left origin of the rotated image
+    #     origin = (pos[0] - originPos[0] + min_box[0] - pivot_move[0], pos[1] - originPos[1] - max_box[1] + pivot_move[1])
+
+    #     # get a rotated image
+    #     rotated_image = pygame.transform.rotate(image, angle)
+
+    #     # rotate and blit the image
+    #     surf.blit(rotated_image, origin)
+
+    #     # draw rectangle around the image
+    #     pygame.draw.rect (surf, (255, 0, 0), (*origin, *rotated_image.get_size()),2)
+
 
     # updating function for movement
     def update(self):
@@ -237,9 +272,9 @@ class SimpleDrone:
         arm_right = self.make_sonar_arm()
 
         # Rotate them and get readings. (3 different sonar arms.)
-        readings.append(self.get_arm_distance(arm_left, 10.75, screen))
+        readings.append(self.get_arm_distance(arm_left, 45, screen))
         readings.append(self.get_arm_distance(arm_middle, 0, screen))
-        readings.append(self.get_arm_distance(arm_right, -10.75, screen))
+        readings.append(self.get_arm_distance(arm_right, -45, screen))
 
         return readings
 
