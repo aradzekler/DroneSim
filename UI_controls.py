@@ -13,37 +13,21 @@ class UiControls:
         self.drone = drone
         self.main = main
         self.scene_metrics = []
-       
-       
+
+        self.init_buttons()
+
         pygame.time.set_timer(pygame.USEREVENT, 1000)
-        pygame.font.init()
 
-
-        # button creation
-        buttonsWidthLocation = self.main_s.get_width() - 190
-        buttonHeight = 50
-        #TODO: find out how to add border to button
-        auto_manual_button = self.create_button(buttonsWidthLocation, 0, 'Manual/Auto')
-        track_button = self.create_button(buttonsWidthLocation, buttonHeight ,'Track')
-        pause_button = self.create_button(buttonsWidthLocation, buttonHeight*2, 'Quit')
-        log_button = self.create_button(buttonsWidthLocation, buttonHeight*3, 'Toggle CsvLogging')
-        # button in the right-down corner.
-
-        self.button_list = [auto_manual_button, track_button, pause_button, log_button]  # a list containing all butto
-
-
-    # drawing the button on pygame canvas.
-    def draw_button(self,button, screen):
-        """Draw the button rect and the text surface."""
-        pygame.draw.rect(screen, button['color'], button['rect'])
-        screen.blit(button['text'], button['text rect'])
 
     def update(self):
         self.trigger_event_listeners()
 
+
     def display(self):
+        """Draw the button rect and the text surface."""
         for button in self.button_list:
-            self.draw_button(button, self.main_s)
+            pygame.draw.rect(self.main_s, button['color'], button['rect'])
+            self.main_s.blit(button['text'], button['text rect'])
 
 
     def trigger_event_listeners(self):
@@ -85,6 +69,20 @@ class UiControls:
                         button['color'] = INACTIVE_BUTTON_COLOR
         if self.drone.event == 'manual_control':  # if we are in manual control
             self.drone.on_event('manual_control')
+
+
+    def init_buttons(self):
+        """Init buttons list"""
+        buttonsWidthLocation = self.main_s.get_width() - 190
+        buttonHeight = 50
+        #TODO: find out how to add border to button
+        auto_manual_button = self.create_button(buttonsWidthLocation, 0, 'Manual/Auto')
+        track_button = self.create_button(buttonsWidthLocation, buttonHeight ,'Track')
+        pause_button = self.create_button(buttonsWidthLocation, buttonHeight*2, 'Quit')
+        log_button = self.create_button(buttonsWidthLocation, buttonHeight*3, 'Toggle CsvLogging')
+  
+        self.button_list = [auto_manual_button, track_button, pause_button, log_button]  # a list containing all butto
+
 
     def create_button(self,x, y,text, width=180, height=50):
         # The button is a dictionary consisting of the rect, text,
