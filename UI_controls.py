@@ -6,12 +6,12 @@ ACTIVE_BUTTON_COLOR = pygame.Color('dodgerblue1')
 INACTIVE_BUTTON_COLOR = pygame.Color('dodgerblue4')
 
 class UiControls:
-    def __init__(self,game_map,main_s,drone):
+    def __init__(self,game_map,main_s,drone,main):
         self.update_list = []
         self.game_map = game_map
         self.main_s = main_s
         self.drone = drone
-        # self.play_game_callback = play_game_callback
+        self.main = main
         self.scene_metrics = []
        
        
@@ -46,8 +46,7 @@ class UiControls:
     def trigger_event_listeners(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                a = True
-                # self.play_game_callback(False)
+                self.main.stopped = True
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 # 1 is the left mouse button, 2 is middle, 3 is right.
                 if event.button == 1:
@@ -69,13 +68,7 @@ class UiControls:
                                 else:
                                     self.drone.tracking = True
                             if button == self.button_list[2]:  # quit button
-                                a = True
-                                # self.play_game_callback(False)
-                                # if running:
-                                #     csv_f = open('csvfile.csv', 'w')  # handling logging to csv file before closing.
-                                #     csv_f.write(log_file)
-                                #     csv_f.close()
-                                #     running = False
+                                self.main.stopped = True
                             if button == self.button_list[3]:
                                 if not logging:
                                     logging = True

@@ -40,7 +40,7 @@ class MainRun:
         sim_map = pygame.image.load(constants.TMP_MAP_PATH).convert()  # loading the map with the temp name given.
 
         drone = Drone(100, 300, main_s, game_map)  # drone object, starting from coordinates 100,300
-        ui_controls = UiControls(game_map,main_s,drone)
+        ui_controls = UiControls(game_map,main_s,drone,self)
         ui_metrics= UiMetrics(main_s,drone,clock,self)
         logger = Logger(self,log_file="log.log")
 
