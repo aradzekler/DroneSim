@@ -5,12 +5,12 @@ import constants
 ACTIVE_BUTTON_COLOR = pygame.Color('dodgerblue1')
 INACTIVE_BUTTON_COLOR = pygame.Color('dodgerblue4')
 
-class UI_metrics:
-    def __init__(self,main_s,drone,clock,time):
+class UiMetrics:
+    def __init__(self,main_s,drone,clock,main):
         self.main_s = main_s
         self.drone = drone
         self.clock = clock
-        self.time = time
+        self.main = main
         self.scene_metrics = []
        
         pygame.font.init()
@@ -30,7 +30,7 @@ class UI_metrics:
                     "B key" + str(self.drone.backward),
                     "Collided: " + str(self.drone.is_colliding),
                     "Collision Detected: " + str(self.drone.front_detect),
-                    "Time: " + str('{0:%H:%M:%S}'.format(self.time))]
+                    "Time: " + str(self.main.time)]
 
 
     def display(self):

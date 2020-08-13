@@ -5,7 +5,7 @@ import constants
 ACTIVE_BUTTON_COLOR = pygame.Color('dodgerblue1')
 INACTIVE_BUTTON_COLOR = pygame.Color('dodgerblue4')
 
-class UI_controls:
+class UiControls:
     def __init__(self,game_map,main_s,drone):
         self.update_list = []
         self.game_map = game_map

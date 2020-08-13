@@ -1,6 +1,6 @@
 Active venv in widnows
 
-`.\venv\Scripts\activate`
+`env\Scripts\activate`
 
 Python version 
 `3.8.3`

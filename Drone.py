@@ -1,6 +1,6 @@
 import pygame
 import math as math
-import Model_States
+from model_states import ManualState,AutoState
 
 # TODO: ADD LIDARS, ADD AI, GENERICS
 
@@ -39,8 +39,8 @@ class Drone:
         self.rect.y = self.body.get_rect().height / 2 + y
         self.game_map = game_map
         self.main_s = main_s
-        manual_state = Model_States.ManualState()
-        auto_state = Model_States.AutoState()
+        manual_state = ManualState()
+        auto_state = AutoState()
         self.state = manual_state  # the drone state
         self.event = 'manual_control'
 
