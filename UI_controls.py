@@ -17,13 +17,16 @@ class UiControls:
        
         pygame.time.set_timer(pygame.USEREVENT, 1000)
         pygame.font.init()
-        self.font = pygame.font.SysFont("", 20)
-        self.FONT = pygame.font.Font(None, 30)
+
+
         # button creation
-        auto_manual_button = self.create_button(self.game_map.map_width - 180, self.game_map.map_height - 50, 180, 50, 'Manual/Auto')
-        track_button = self.create_button(self.game_map.map_width - 180, self.game_map.map_height - (100 + 1), 180, 50, 'Track')
-        pause_button = self.create_button(self.game_map.map_width - 180, self.game_map.map_height - (150 + 2), 180, 50, 'Quit')
-        log_button = self.create_button(self.game_map.map_width - 180, self.game_map.map_height - (200 + 3), 180, 50, 'Toggle CsvLogging')
+        buttonsWidthLocation = self.main_s.get_width() - 190
+        buttonHeight = 50
+        #TODO: find out how to add border to button
+        auto_manual_button = self.create_button(buttonsWidthLocation, 0, 'Manual/Auto')
+        track_button = self.create_button(buttonsWidthLocation, buttonHeight ,'Track')
+        pause_button = self.create_button(buttonsWidthLocation, buttonHeight*2, 'Quit')
+        log_button = self.create_button(buttonsWidthLocation, buttonHeight*3, 'Toggle CsvLogging')
         # button in the right-down corner.
 
         self.button_list = [auto_manual_button, track_button, pause_button, log_button]  # a list containing all butto
@@ -83,12 +86,14 @@ class UiControls:
         if self.drone.event == 'manual_control':  # if we are in manual control
             self.drone.on_event('manual_control')
 
-    def create_button(self,x, y, w, h, text):
+    def create_button(self,x, y,text, width=180, height=50):
         # The button is a dictionary consisting of the rect, text,
         # text rect, color and the callback function.
-        text_surf = self.FONT.render(text, True, constants.WHITE)
-        button_rect = pygame.Rect(x, y, w, h)
+        text_surf = constants.FONT_SIZE_BIG().render(text, True, constants.WHITE)
+        button_rect = pygame.Rect(x, y, width, height)
         text_rect = text_surf.get_rect(center=button_rect.center)
+     
+
         button = {
             'rect': button_rect,
             'text': text_surf,

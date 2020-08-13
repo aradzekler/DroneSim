@@ -14,9 +14,7 @@ class UiMetrics:
         self.scene_metrics = []
        
         pygame.font.init()
-        self.font = pygame.font.SysFont("", 20)
-        self.FONT = pygame.font.Font(None, 30)
-  
+        
 
     def update(self):
         self.scene_metrics = ["FPS: " + str("%.0f" % self.clock.get_fps()),  # our telemetry window.
@@ -35,5 +33,5 @@ class UiMetrics:
 
     def display(self):
         for element_val in range(0, len(self.scene_metrics)):  # adding text in the side of the screen
-            self.main_s.blit(self.font.render(str(self.scene_metrics[element_val]), True, (0, 255, 0)), (10, 10 + (20 * element_val)))
+            self.main_s.blit(constants.FONT_SIZE_NORMAL().render(str(self.scene_metrics[element_val]),True,constants.BLACK), (10, 10 + (20 * element_val)))
 

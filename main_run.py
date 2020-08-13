@@ -11,6 +11,7 @@ from logger import Logger
 
 clock = pygame.time.Clock()
 pygame.init()  # initialize pygame window
+pygame.font.init()
 
 class MainRun:
     def __init__(self):
@@ -36,7 +37,7 @@ class MainRun:
         # map_image_path = eg.fileopenbox()  # opens a file choosing dialog.
         game_map = Map(constants.MAP_IMAGE_PATH)  # setting map object, map choosing is inside the object.
         game_map.create_map_from_img()
-        main_s = pygame.display.set_mode((game_map.map_width, game_map.map_height))  # our main display
+        main_s = pygame.display.set_mode((constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT))  # our main display
         sim_map = pygame.image.load(constants.TMP_MAP_PATH).convert()  # loading the map with the temp name given.
 
         drone = Drone(100, 300, main_s, game_map)  # drone object, starting from coordinates 100,300
@@ -49,8 +50,8 @@ class MainRun:
             # Something wrong with time format, see logs
             self.time = pygame.time.get_ticks()/1000
 
-            main_s.fill(constants.BLACK)  # resets the map every loop.
-            main_s.blit(sim_map, (0, 0))  # filling screen with map
+            main_s.fill(constants.YELLOW)  # resets the map every loop.
+            main_s.blit(sim_map, (200,0))  # filling screen with map
             # TODO: a method for logging key pressings.
             # TODO: implement autostate
             # need to implement auto state
