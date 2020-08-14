@@ -16,7 +16,7 @@ class UiControls:
 
         self.init_buttons()
 
-        pygame.time.set_timer(pygame.USEREVENT, 1000)
+        # pygame.time.set_timer(pygame.USEREVENT, 1000)
 
 
     def update(self):
@@ -36,7 +36,7 @@ class UiControls:
                 self.main.stopped = True
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 # 1 is the left mouse button, 2 is middle, 3 is right.
-                if event.button == 1:
+                if event.button == constants.MouseButton.left.value:
                     for button in self.button_list:
                         # `event.pos` is the mouse position.
                         if button['rect'].collidepoint(event.pos):
@@ -56,9 +56,11 @@ class UiControls:
                                     self.drone.tracking = True
                             if button == self.button_list[2]:  # quit button
                                 self.main.stopped = True
-                            if button == self.button_list[3]:
-                                if not logging:
-                                    logging = True
+                            if button == self.button_list[3]: # log data button
+                                if self.main.log_data:
+                                    self.main.log_data = False
+                                else:
+                                    self.main.log_data = True
             elif event.type == pygame.MOUSEMOTION:
                 # When the mouse gets moved, change the color of the
                 # buttons if they collide with the mouse.

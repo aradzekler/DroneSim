@@ -12,9 +12,7 @@ class UiMetrics:
         self.clock = clock
         self.main = main
         self.scene_metrics = []
-       
-        pygame.font.init()
-        
+    
 
     def update(self):
         self.scene_metrics = ["FPS: " + str("%.0f" % self.clock.get_fps()),  # our telemetry window.

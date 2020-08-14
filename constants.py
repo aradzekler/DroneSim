@@ -1,4 +1,5 @@
 import pygame
+import enum 
 
 # Original image
 MAP_IMAGE_PATH:str = r"E:/Repos/DroneSim/.maps/p15.png"
@@ -21,3 +22,10 @@ def FONT_SIZE_BIG():
 
 def FONT_SIZE_NORMAL():
     return  pygame.font.Font(None, 20)
+
+
+# creating enumerations using class 
+class MouseButton(enum.Enum): 
+    left = 1
+    middle = 2
+    right = 3

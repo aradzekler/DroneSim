@@ -19,6 +19,7 @@ class MainRun:
         self.time = datetime.datetime.min
         self.clock = clock
         self.stopped = False
+        self.log_data = False
         self.Main()
 
     def update_all(self,elements):
@@ -33,6 +34,7 @@ class MainRun:
 
 
     def Main(self):
+
         # TODO: Enable for map selection dialog and remove constant 
         # map_image_path = eg.fileopenbox()  # opens a file choosing dialog.
         game_map = Map(constants.MAP_IMAGE_PATH)  # setting map object, map choosing is inside the object.
@@ -40,6 +42,7 @@ class MainRun:
         main_s = pygame.display.set_mode((constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT))  # our main display
         sim_map = pygame.image.load(constants.TMP_MAP_PATH).convert()  # loading the map with the temp name given.
 
+        # Creating game objects
         drone = Drone(100, 300, main_s, game_map)  # drone object, starting from coordinates 100,300
         ui_controls = UiControls(game_map,main_s,drone,self)
         ui_metrics= UiMetrics(main_s,drone,clock,self)
@@ -58,10 +61,10 @@ class MainRun:
 
             self.update_all([drone,ui_metrics,ui_controls])
             self.display_all([drone,ui_metrics,ui_controls])
-
-            # logger.log(drone,clock,time)
             
-            logger.log(drone=drone)
+            if self.log_data:
+                logger.log(drone=drone)
+                 
             pygame.display.flip()  # show the surface we created on the actual screen.
 
 MainRun()
