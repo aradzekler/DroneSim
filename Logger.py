@@ -7,13 +7,13 @@ import sys
 
 
 class Logger(object):  # pragma: no cover
-    def __init__(self, name="", log_file=None, level='info'):
+    def __init__(self,main, name="", log_file=None, level='info'):
         # create logger on the current module and set its level
         self.logger = logging.getLogger(name)
         self.logger.setLevel(logging.INFO)
         self.logger.setLevel(getattr(logging, level.upper()))
         self.needs_header = True
-
+        self.main = main
         # create a formatter that creates a single line of json with a comma at the end
         self.formatter = logging.Formatter(
             (
@@ -33,7 +33,7 @@ class Logger(object):  # pragma: no cover
         # connect the logger to the channel
         self.logger.addHandler(ch)
 
-    def log(self,drone,clock,time,level='info'):
+    def log(self,drone,level='info'):
         HEADER = 'time,fps,curent_speed,move_x,move_y,is_forward,is_left,is_right,is_backward,is_colliding,front_detect\n'
         if self.needs_header:
             if self.log_file and os.path.isfile(self.log_file):
@@ -49,8 +49,8 @@ class Logger(object):  # pragma: no cover
             self.needs_header = False
 
         extra = {
-            'time': '{0:%H:%M:%S}'.format(time),
-            'fps': "%.0f" % clock.get_fps(),
+            'time': str(self.main.time),
+            'fps': "%.0f" % self.main.clock.get_fps(),
             'angle': "%.2f" % drone.angle,
             'curent_speed': "%.2f" % drone.current_speed,
             'move_x': "%.2f" % drone.move_x,

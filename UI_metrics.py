@@ -5,18 +5,13 @@ import constants
 ACTIVE_BUTTON_COLOR = pygame.Color('dodgerblue1')
 INACTIVE_BUTTON_COLOR = pygame.Color('dodgerblue4')
 
-class UI_metrics:
-    def __init__(self,main_s,drone,clock,time):
-        self.main_s = main_s
+class UiMetrics:
+    def __init__(self,main,drone,clock):
         self.drone = drone
         self.clock = clock
-        self.time = time
+        self.main = main
         self.scene_metrics = []
-       
-        pygame.font.init()
-        self.font = pygame.font.SysFont("", 20)
-        self.FONT = pygame.font.Font(None, 30)
-  
+        self.fonts = constants.Fonts()
 
     def update(self):
         self.scene_metrics = ["FPS: " + str("%.0f" % self.clock.get_fps()),  # our telemetry window.
@@ -30,10 +25,10 @@ class UI_metrics:
                     "B key" + str(self.drone.backward),
                     "Collided: " + str(self.drone.is_colliding),
                     "Collision Detected: " + str(self.drone.front_detect),
-                    "Time: " + str('{0:%H:%M:%S}'.format(self.time))]
+                    "Time: " + str(self.main.time)]
 
 
     def display(self):
         for element_val in range(0, len(self.scene_metrics)):  # adding text in the side of the screen
-            self.main_s.blit(self.font.render(str(self.scene_metrics[element_val]), True, (0, 255, 0)), (10, 10 + (20 * element_val)))
+            self.main.main_s.blit(self.fonts.font_size_normal.render(str(self.scene_metrics[element_val]),True,constants.BLACK), (10, 10 + (20 * element_val)))
 
