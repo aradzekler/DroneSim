@@ -45,7 +45,7 @@ class MainRun:
         game_map.create_map_from_img()
 
         # Creating game objects
-        drone = Drone(self,400, 300, game_map)  # drone object, starting from coordinates 100,300
+        drone = Drone(self,280, 300, game_map)  # drone object, starting from coordinates 100,300
         ui_controls = UiControls(self,drone)
         ui_metrics= UiMetrics(self,drone,clock)
         logger = Logger(self,log_file="log.log")

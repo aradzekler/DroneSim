@@ -38,7 +38,7 @@ class Drone:
         self.rect.x = self.body.get_rect().width / 2 + x  # x location
         self.rect.y = self.body.get_rect().height / 2 + y
         self.game_map = game_map
-        self.main_s = main.main_s
+        self.main = main
         manual_state = ManualState()
         auto_state = AutoState()
         self.state = manual_state  # the drone state
@@ -70,6 +70,52 @@ class Drone:
         self.move_x = 0
         self.move_y = 0
         self.angle = 0
+
+
+    # display the drone on the map.
+    def display(self):
+
+        # self.blitRotate(main_surface,self.body,(self.rect.x, self.rect.y),(self.rect.x, self.rect.y),self.angle)
+        for coordinate in self.drone_track:  # painting our tracking
+            pygame.draw.circle(self.main.main_s, coordinate[2], (coordinate[0], coordinate[1]), 1)  # draw the circle in
+            # the coordinates with the coordinates color
+            
+        body_image = pygame.transform.rotate(self.body, self.angle)
+        self.main.main_s.blit(body_image, (self.rect.x, self.rect.y))
+
+
+        # loc = self.body.get_rect().center  #rot_image is not defined 
+        # rot_sprite = pygame.transform.rotate(self.body, self.angle)
+        # rot_sprite.get_rect().center = loc
+        # main_surface.blit(rot_sprite, (self.rect.x, self.rect.y))
+
+        # rotor_image = pygame.transform.rotate(self.rotors, self.angle)
+        # main_surface.blit(rotor_image, (self.rect.x, self.rect.y))
+
+        self.get_sonar_readings(self.main.main_s)
+        # self.rect.x, self.rect.y = self.rect.center
+        # self.rect.center = (self.rect.x, self.rect.y)
+            
+
+    # updating function for movement
+    def update(self):
+        self.move_x = 0  # no momentum
+        self.move_y = 0
+        for block in self.game_map.collide_list:  # check for collisions
+            if self.rect.colliderect(block):
+                self.is_colliding = True
+
+        if self.tracking and self.is_colliding:  # if tracking in on
+            self.drone_track.add((self.rect.x + int(self.sensor_x_relative), self.rect.y + int(self.sensor_y_relative),
+                                  RED))  # if collided add red track
+        elif self.tracking:
+            self.drone_track.add(
+                (self.rect.x + int(self.sensor_x_relative), self.rect.y + int(self.sensor_y_relative),
+                 BLUE))  # if not, add blue
+        self.rotate()
+        self.move()
+        self.reset_data()
+
 
     def on_event(self, event):
         """
@@ -164,72 +210,8 @@ class Drone:
 
 
     
-    # display the drone on the map.
-    def display(self):
-        body_image = pygame.transform.rotate(self.body, self.angle)
-        self.main_s.blit(body_image, (self.rect.x, self.rect.y))
-        # self.blitRotate(main_surface,self.body,(self.rect.x, self.rect.y),(self.rect.x, self.rect.y),self.angle)
 
-        # loc = self.body.get_rect().center  #rot_image is not defined 
-        # rot_sprite = pygame.transform.rotate(self.body, self.angle)
-        # rot_sprite.get_rect().center = loc
-        # main_surface.blit(rot_sprite, (self.rect.x, self.rect.y))
-
-        # rotor_image = pygame.transform.rotate(self.rotors, self.angle)
-        # main_surface.blit(rotor_image, (self.rect.x, self.rect.y))
-
-        self.get_sonar_readings(self.main_s)
-        # self.rect.x, self.rect.y = self.rect.center
-        # self.rect.center = (self.rect.x, self.rect.y)
-
-
-    # def blitRotate(self,surf, image, pos, originPos, angle):
-    #     # calcaulate the axis aligned bounding box of the rotated image
-    #     w, h       = image.get_size()
-    #     box        = [pygame.math.Vector2(p) for p in [(0, 0), (w, 0), (w, -h), (0, -h)]]
-    #     box_rotate = [p.rotate(angle) for p in box]
-    #     min_box    = (min(box_rotate, key=lambda p: p[0])[0], min(box_rotate, key=lambda p: p[1])[1])
-    #     max_box    = (max(box_rotate, key=lambda p: p[0])[0], max(box_rotate, key=lambda p: p[1])[1])
-
-    #     # calculate the translation of the pivot 
-    #     pivot        = pygame.math.Vector2(originPos[0], -originPos[1])
-    #     pivot_rotate = pivot.rotate(angle)
-    #     pivot_move   = pivot_rotate - pivot
-
-    #     # calculate the upper left origin of the rotated image
-    #     origin = (pos[0] - originPos[0] + min_box[0] - pivot_move[0], pos[1] - originPos[1] - max_box[1] + pivot_move[1])
-
-    #     # get a rotated image
-    #     rotated_image = pygame.transform.rotate(image, angle)
-
-    #     # rotate and blit the image
-    #     surf.blit(rotated_image, origin)
-
-    #     # draw rectangle around the image
-    #     pygame.draw.rect (surf, (255, 0, 0), (*origin, *rotated_image.get_size()),2)
-
-
-    # updating function for movement
-    def update(self):
-        self.move_x = 0  # no momentum
-        self.move_y = 0
-        for block in self.game_map.collide_list:  # check for collisions
-            if self.rect.colliderect(block):
-                self.is_colliding = True
-
-        if self.tracking and self.is_colliding:  # if tracking in on
-            self.drone_track.add((self.rect.x + int(self.sensor_x_relative), self.rect.y + int(self.sensor_y_relative),
-                                  RED))  # if collided add red track
-        elif self.tracking:
-            self.drone_track.add(
-                (self.rect.x + int(self.sensor_x_relative), self.rect.y + int(self.sensor_y_relative),
-                 BLUE))  # if not, add blue
-        for coordinate in self.drone_track:  # painting our tracking
-            pygame.draw.circle(self.main_s, coordinate[2], (coordinate[0], coordinate[1]), 1)  # draw the circle in
-            # the coordinates with the coordinates color
-        self.rotate()
-        self.move()
-        self.reset_data()
+       
 
     # sonar detection function
     def get_arm_distance(self, arm, offset, screen):
