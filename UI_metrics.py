@@ -12,7 +12,7 @@ class UiMetrics:
         self.clock = clock
         self.main = main
         self.scene_metrics = []
-    
+        self.fonts = constants.Fonts()
 
     def update(self):
         self.scene_metrics = ["FPS: " + str("%.0f" % self.clock.get_fps()),  # our telemetry window.
@@ -31,5 +31,5 @@ class UiMetrics:
 
     def display(self):
         for element_val in range(0, len(self.scene_metrics)):  # adding text in the side of the screen
-            self.main_s.blit(constants.FONT_SIZE_NORMAL().render(str(self.scene_metrics[element_val]),True,constants.BLACK), (10, 10 + (20 * element_val)))
+            self.main_s.blit(self.fonts.font_size_normal.render(str(self.scene_metrics[element_val]),True,constants.BLACK), (10, 10 + (20 * element_val)))
 

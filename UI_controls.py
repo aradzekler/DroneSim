@@ -13,6 +13,7 @@ class UiControls:
         self.drone = drone
         self.main = main
         self.scene_metrics = []
+        self.fonts = constants.Fonts()
 
         self.init_buttons()
 
@@ -89,7 +90,7 @@ class UiControls:
     def create_button(self,x, y,text, width=180, height=50):
         # The button is a dictionary consisting of the rect, text,
         # text rect, color and the callback function.
-        text_surf = constants.FONT_SIZE_BIG().render(text, True, constants.WHITE)
+        text_surf = self.fonts.font_size_big.render(text, True, constants.WHITE)
         button_rect = pygame.Rect(x, y, width, height)
         text_rect = text_surf.get_rect(center=button_rect.center)
      

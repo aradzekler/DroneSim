@@ -20,6 +20,8 @@ class MainRun:
         self.clock = clock
         self.stopped = False
         self.log_data = False
+        self.main_s = pygame.display.set_mode((constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT))  # our main display
+        self.sim_map = pygame.image.load(constants.TMP_MAP_PATH).convert()  # loading the map with the temp name given.
         self.Main()
 
     def update_all(self,elements):
@@ -39,22 +41,21 @@ class MainRun:
         # map_image_path = eg.fileopenbox()  # opens a file choosing dialog.
         game_map = Map(constants.MAP_IMAGE_PATH)  # setting map object, map choosing is inside the object.
         game_map.create_map_from_img()
-        main_s = pygame.display.set_mode((constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT))  # our main display
-        sim_map = pygame.image.load(constants.TMP_MAP_PATH).convert()  # loading the map with the temp name given.
+
 
         # Creating game objects
-        drone = Drone(100, 300, main_s, game_map)  # drone object, starting from coordinates 100,300
-        ui_controls = UiControls(game_map,main_s,drone,self)
-        ui_metrics= UiMetrics(main_s,drone,clock,self)
+        drone = Drone(100, 300, self.main_s, game_map)  # drone object, starting from coordinates 100,300
+        ui_controls = UiControls(game_map,self.main_s,drone,self)
+        ui_metrics= UiMetrics(self.main_s,drone,clock,self)
         logger = Logger(self,log_file="log.log")
 
+
         while self.stopped == False:
-            clock.tick(constants.FPS)
-            # Something wrong with time format, see logs
+            clock.tick()
             self.time = pygame.time.get_ticks()/1000
 
-            main_s.fill(constants.YELLOW)  # resets the map every loop.
-            main_s.blit(sim_map, (200,0))  # filling screen with map
+            self.main_s.fill(constants.YELLOW)  # resets the map every loop.
+            self.main_s.blit(self.sim_map, (200,0))  # filling screen with map
             # TODO: a method for logging key pressings.
             # TODO: implement autostate
             # need to implement auto state
