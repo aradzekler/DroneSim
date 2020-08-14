@@ -4,13 +4,21 @@ from PIL import Image
 
 # Main class for dealing with out map.
 class Map:
-    def __init__(self,map_image_path:str):
+    def __init__(self,main,map_image_path:str):
         self.map_image_path = map_image_path
         self.map_width = 0
         self.map_height = 0
+        self.main = main
         self.collide_list = []  # a list full of all the 'black spots'/walls
         self.surface = []  # a list full of all the 'black spots'/walls
 
+
+    def update(self):
+        pass
+
+
+    def display(self):
+        self.main.main_s.blit(self.surface, (200,0))  # filling screen with map
 
 
     def create_map_from_img(self):

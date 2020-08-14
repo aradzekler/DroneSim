@@ -6,8 +6,7 @@ ACTIVE_BUTTON_COLOR = pygame.Color('dodgerblue1')
 INACTIVE_BUTTON_COLOR = pygame.Color('dodgerblue4')
 
 class UiMetrics:
-    def __init__(self,main_s,drone,clock,main):
-        self.main_s = main_s
+    def __init__(self,main,drone,clock):
         self.drone = drone
         self.clock = clock
         self.main = main
@@ -31,5 +30,5 @@ class UiMetrics:
 
     def display(self):
         for element_val in range(0, len(self.scene_metrics)):  # adding text in the side of the screen
-            self.main_s.blit(self.fonts.font_size_normal.render(str(self.scene_metrics[element_val]),True,constants.BLACK), (10, 10 + (20 * element_val)))
+            self.main.main_s.blit(self.fonts.font_size_normal.render(str(self.scene_metrics[element_val]),True,constants.BLACK), (10, 10 + (20 * element_val)))
 

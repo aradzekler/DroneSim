@@ -6,9 +6,8 @@ ACTIVE_BUTTON_COLOR = pygame.Color('dodgerblue1')
 INACTIVE_BUTTON_COLOR = pygame.Color('dodgerblue4')
 
 class UiControls:
-    def __init__(self,main_s,drone,main):
+    def __init__(self,main,drone):
         self.update_list = []
-        self.main_s = main_s
         self.drone = drone
         self.main = main
         self.scene_metrics = []
@@ -26,8 +25,8 @@ class UiControls:
     def display(self):
         """Draw the button rect and the text surface."""
         for button in self.button_list:
-            pygame.draw.rect(self.main_s, button['color'], button['rect'])
-            self.main_s.blit(button['text'], button['text rect'])
+            pygame.draw.rect(self.main.main_s, button['color'], button['rect'])
+            self.main.main_s.blit(button['text'], button['text rect'])
 
 
     def trigger_event_listeners(self):
@@ -75,7 +74,7 @@ class UiControls:
 
     def init_buttons(self):
         """Init buttons list"""
-        buttonsWidthLocation = self.main_s.get_width() - 190
+        buttonsWidthLocation = self.main.main_s.get_width() - 190
         buttonHeight = 50
         #TODO: find out how to add border to button
         auto_manual_button = self.create_button(buttonsWidthLocation, 0, 'Manual/Auto')

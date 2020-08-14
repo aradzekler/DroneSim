@@ -31,14 +31,14 @@ def get_rotated_point(x_1, y_1, x_2, y_2, angle):
 
 
 class Drone:
-    def __init__(self, x, y, main_s, game_map):
+    def __init__(self,main, x, y, game_map):
         self.body = pygame.image.load("Images//Body//Grey.png").convert()  # images for the model itself.
         self.rotors = pygame.image.load("Images//Wheels//Black.png").convert()
         self.rect = self.body.get_rect()  # get rectangle the size of the body. our hitbox
         self.rect.x = self.body.get_rect().width / 2 + x  # x location
         self.rect.y = self.body.get_rect().height / 2 + y
         self.game_map = game_map
-        self.main_s = main_s
+        self.main_s = main.main_s
         manual_state = ManualState()
         auto_state = AutoState()
         self.state = manual_state  # the drone state

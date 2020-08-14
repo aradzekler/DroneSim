@@ -21,7 +21,7 @@ def FONT_SIZE_NORMAL():
     return  pygame.font.Font(None, 20)
 
 # Main
-FPS = 100
+FPS = 80
 
 # enums 
 class MouseButton(enum.Enum): 

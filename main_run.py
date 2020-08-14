@@ -41,38 +41,31 @@ class MainRun:
 
         # TODO: Enable for map selection dialog and remove constant 
         # map_image_path = eg.fileopenbox()  # opens a file choosing dialog.
-        game_map = Map(constants.MAP_IMAGE_PATH)  # setting map object, map choosing is inside the object.
+        game_map = Map(self,constants.MAP_IMAGE_PATH)  # setting map object, map choosing is inside the object.
         game_map.create_map_from_img()
 
         # Creating game objects
-        drone = Drone(100, 300, self.main_s, game_map)  # drone object, starting from coordinates 100,300
-        ui_controls = UiControls(self.main_s,drone,self)
-        ui_metrics= UiMetrics(self.main_s,drone,clock,self)
+        drone = Drone(self,400, 300, game_map)  # drone object, starting from coordinates 100,300
+        ui_controls = UiControls(self,drone)
+        ui_metrics= UiMetrics(self,drone,clock)
         logger = Logger(self,log_file="log.log")
 
 
         while self.stopped == False:
-            #   # gets a single event from the event queue
-            # event = pygame.event.wait()
-            #       # if the 'close' button of the window is pressed
-            # if event.type == pygame.QUIT:
-            #     # stops the application
-            #     break
             clock.tick(constants.FPS)
-            clock.tick()
+            # clock.tick()
 
             self.time = pygame.time.get_ticks()/1000
 
             #TODO: we should not fill and blit every loop, we need to create main_s with map once, and blit only changes of
             # the dron.
             self.main_s.fill(constants.YELLOW)  # resets the map every loop.
-            self.main_s.blit(game_map.surface, (200,0))  # filling screen with map
             # TODO: a method for logging key pressings.
             # TODO: implement autostate
-            # need to implement auto state
 
-            self.update_all([drone,ui_metrics,ui_controls])
-            self.display_all([drone,ui_metrics,ui_controls])
+            # THE ORDER IN THIS ARRAY IS IMPORTANT
+            self.update_all([game_map,drone,ui_metrics,ui_controls])
+            self.display_all([game_map,drone,ui_metrics,ui_controls])
             
             if self.log_data:
                 logger.log(drone=drone)
