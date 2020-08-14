@@ -9,6 +9,8 @@ class Map:
         self.map_width = 0
         self.map_height = 0
         self.collide_list = []  # a list full of all the 'black spots'/walls
+        self.surface = []  # a list full of all the 'black spots'/walls
+
 
 
     def create_map_from_img(self):
@@ -62,3 +64,5 @@ class Map:
                         
             print('Wall (black) blocks added to collision list: ' + str(len(self.collide_list)))
             img.save(constants.TMP_MAP_PATH)
+            #TODO need to dinf a way to create surface form img and not loading it again
+            self.surface = pygame.image.load(constants.TMP_MAP_PATH).convert()
