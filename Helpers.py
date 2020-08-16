@@ -1,6 +1,6 @@
 import time
 import warnings
-
+import math as math
 
 def get_current_time():
     try:
@@ -29,3 +29,8 @@ def clamp(value, limits):
     elif lower is not None and value < lower:
         return lower
     return value
+
+
+# function for converting degrees to radians.
+def deg_to_rad(deg):
+    return deg / 180.0 * math.pi
