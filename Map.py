@@ -1,9 +1,10 @@
 import pygame
 import constants
 from PIL import Image
+from interfaces.pygame_object_interface import PyGameObjectInterface
 
 # Main class for dealing with out map.
-class Map:
+class Map(PyGameObjectInterface):
     def __init__(self,main,map_image_path:str):
         self.map_image_path = map_image_path
         self.map_width = 0
@@ -11,10 +12,6 @@ class Map:
         self.main = main
         self.collide_list = []  # a list full of all the 'black spots'/walls
         self.surface = []  # a list full of all the 'black spots'/walls
-
-
-    def update(self):
-        pass
 
 
     def display(self):

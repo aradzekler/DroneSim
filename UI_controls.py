@@ -1,11 +1,12 @@
 
 import pygame
 import constants
+from interfaces.pygame_object_interface import PyGameObjectInterface
 
 ACTIVE_BUTTON_COLOR = pygame.Color('dodgerblue1')
 INACTIVE_BUTTON_COLOR = pygame.Color('dodgerblue4')
 
-class UiControls:
+class UiControls(PyGameObjectInterface):
     def __init__(self,main,drone):
         self.update_list = []
         self.drone = drone

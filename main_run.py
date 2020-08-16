@@ -45,15 +45,15 @@ class MainRun:
         game_map.create_map_from_img()
 
         # Creating game objects
-        drone = Drone(self,280, 300, game_map)  # drone object, starting from coordinates 100,300
+        drone = Drone(self,350, 250, game_map)  # drone object, starting from coordinates 100,300
         ui_controls = UiControls(self,drone)
         ui_metrics= UiMetrics(self,drone,clock)
         logger = Logger(self,log_file="log.log")
 
 
         while self.stopped == False:
-            clock.tick(constants.FPS)
-            # clock.tick()
+            # clock.tick(constants.FPS)
+            clock.tick()
 
             self.time = pygame.time.get_ticks()/1000
 

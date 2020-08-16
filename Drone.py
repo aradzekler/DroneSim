@@ -1,6 +1,7 @@
 import pygame
 import math as math
 from model_states import ManualState,AutoState
+from interfaces.pygame_object_interface import PyGameObjectInterface
 
 # TODO: ADD LIDARS, ADD AI, GENERICS
 
@@ -30,7 +31,7 @@ def get_rotated_point(x_1, y_1, x_2, y_2, angle):
     return int(new_x), int(new_y)
 
 
-class Drone:
+class Drone(PyGameObjectInterface):
     def __init__(self,main, x, y, game_map):
         self.body = pygame.image.load("Images//Body//Grey.png").convert()  # images for the model itself.
         self.rotors = pygame.image.load("Images//Wheels//Black.png").convert()
