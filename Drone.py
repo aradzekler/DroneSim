@@ -18,14 +18,13 @@ BLUE = (0, 0, 255)
 
 
 class Drone(PyGameObjectInterface):
-    def __init__(self,main, x, y, game_map):
+    def __init__(self,map, x, y):
+        self.map = map
         self.body = pygame.image.load("Images//Body//Grey.png").convert()  # images for the model itself.
         self.rotors = pygame.image.load("Images//Wheels//Black.png").convert()
         self.rect = self.body.get_rect()  # get rectangle the size of the body. our hitbox
         self.rect.x = self.body.get_rect().width / 2 + x  # x location
         self.rect.y = self.body.get_rect().height / 2 + y
-        self.game_map = game_map
-        self.main = main
         manual_state = ManualState()
         auto_state = AutoState()
         self.state = manual_state  # the drone state
@@ -67,12 +66,35 @@ class Drone(PyGameObjectInterface):
 
         self.tof_sensors.extend((sensorLeft, sensorMiddle, sensorRight))
 
+
+    # updating function for movement
+    def update(self):
+        self.move_x = 0  # no momentum
+        self.move_y = 0
+        for block in self.map.collide_list:  # check for collisions
+            if self.rect.colliderect(block):
+                self.is_colliding = True
+
+        if self.tracking and self.is_colliding:  # if tracking in on
+            self.drone_track.add((self.rect.x + int(self.sensor_x_relative), self.rect.y + int(self.sensor_y_relative),
+                                  RED))  # if collided add red track
+        elif self.tracking:
+            self.drone_track.add(
+                (self.rect.x + int(self.sensor_x_relative), self.rect.y + int(self.sensor_y_relative),
+                 BLUE))  # if not, add blue
+       
+        
+        self.rotate()
+        self.move()
+        self.reset_data()
+
+
     # display the drone on the map.
     def display(self):
 
         # self.blitRotate(main_surface,self.body,(self.rect.x, self.rect.y),(self.rect.x, self.rect.y),self.angle)
         for coordinate in self.drone_track:  # painting our tracking
-            pygame.draw.circle(self.main.main_s, coordinate[2], (coordinate[0], coordinate[1]), 1)  # draw the circle in
+            pygame.draw.circle(self.map.surface, coordinate[2], (coordinate[0], coordinate[1]), 1)  # draw the circle in
             # the coordinates with the coordinates color
             
         # loc = self.body.get_rect().center  #rot_image is not defined 
@@ -85,31 +107,13 @@ class Drone(PyGameObjectInterface):
         
         # self.rect.x, self.rect.y = self.rect.center
         # self.rect.center = (self.rect.x, self.rect.y)
-        self.update_all(self.tof_sensors)
-        self.display_all(self.tof_sensors)  
+        
+        # self.update_all(self.tof_sensors)
+        # self.display_all(self.tof_sensors)  
 
         body_image = pygame.transform.rotate(self.body, self.angle)
-        self.main.main_s.blit(body_image, (self.rect.x, self.rect.y))
-
-    # updating function for movement
-    def update(self):
-        self.move_x = 0  # no momentum
-        self.move_y = 0
-        for block in self.game_map.collide_list:  # check for collisions
-            if self.rect.colliderect(block):
-                self.is_colliding = True
-
-        if self.tracking and self.is_colliding:  # if tracking in on
-            self.drone_track.add((self.rect.x + int(self.sensor_x_relative), self.rect.y + int(self.sensor_y_relative),
-                                  RED))  # if collided add red track
-        elif self.tracking:
-            self.drone_track.add(
-                (self.rect.x + int(self.sensor_x_relative), self.rect.y + int(self.sensor_y_relative),
-                 BLUE))  # if not, add blue
-        self.rotate()
-        self.move()
-        self.reset_data()
-
+        self.map.surface.blit(body_image, (self.rect.x, self.rect.y))
+     
 
     def on_event(self, event):
         """

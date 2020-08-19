@@ -39,19 +39,19 @@ class TofSensor():
                 self.drone.rect.x + self.drone.sensor_x_relative, self.drone.rect.y + self.drone.sensor_y_relative, point[0], point[1],
                 self.drone.angle + self.offset)
             #TODO remove dependency to main, drone must be surface too
-            pygame.draw.circle(self.drone.main.main_s, (255, 0, 255), rotated_p, 1)  # drawing sonar arms.
+            pygame.draw.circle(self.drone.map.surface, (255, 0, 255), rotated_p, 1)  # drawing sonar arms.
             rotated_list_p = list(rotated_p)
             rotated_list_p[0] += 1  # nasty workaround to change the tuple rotated_p value in order to 'see' the white
             # and not purple.
             rotated_p = tuple(rotated_list_p)
             # Check if we've hit something.
             if rotated_p[0] <= 0 or rotated_p[1] <= 0 \
-                    or rotated_p[0] >= self.drone.game_map.map_width or rotated_p[1] >= self.drone.game_map.map_height:
+                    or rotated_p[0] >= self.drone.map.map_width or rotated_p[1] >= self.drone.map.map_height:
                 self.front_detect = True  # Sensor is off the screen.
                 return i
             else:  # if we are not offscrean.
                 #TODO remove dependency to main, drone must be surface too
-                obs = self.drone.main.main_s.get_at(rotated_p)
+                obs = self.drone.map.surface.get_at(rotated_p)
                 if obs == D_BLACK and self.drone.show_sensors:
                     self.front_detect = True
 

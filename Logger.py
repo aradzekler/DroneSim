@@ -33,7 +33,7 @@ class Logger(object):  # pragma: no cover
         # connect the logger to the channel
         self.logger.addHandler(ch)
 
-    def log(self,drone,level='info'):
+    def log(self,level='info'):
         HEADER = 'time,fps,curent_speed,move_x,move_y,is_forward,is_left,is_right,is_backward,is_colliding,front_detect\n'
         if self.needs_header:
             if self.log_file and os.path.isfile(self.log_file):
@@ -51,16 +51,16 @@ class Logger(object):  # pragma: no cover
         extra = {
             'time': str(self.main.time),
             'fps': "%.0f" % self.main.clock.get_fps(),
-            'angle': "%.2f" % drone.angle,
-            'curent_speed': "%.2f" % drone.current_speed,
-            'move_x': "%.2f" % drone.move_x,
-            'move_y': "%.2f" % drone.move_y,
-            'is_forward': drone.forward,
-            'is_left': drone.left,
-            'is_right': drone.right,
-            'is_backward': drone.backward,
-            'is_colliding': drone.is_colliding,
-            'front_detect': drone.front_detect,
+            'angle': "%.2f" % self.main.map.drone.angle,
+            'curent_speed': "%.2f" % self.main.map.drone.current_speed,
+            'move_x': "%.2f" % self.main.map.drone.move_x,
+            'move_y': "%.2f" % self.main.map.drone.move_y,
+            'is_forward': self.main.map.drone.forward,
+            'is_left': self.main.map.drone.left,
+            'is_right': self.main.map.drone.right,
+            'is_backward': self.main.map.drone.backward,
+            'is_colliding': self.main.map.drone.is_colliding,
+            'front_detect': self.main.map.drone.front_detect,
         }
         func = getattr(self.logger, level)
         func(msg="",extra=extra)

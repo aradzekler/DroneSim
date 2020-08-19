@@ -10,7 +10,7 @@ class PyGameObjectInterface:
         for element in elements:
             element.display()
 
-    
+
     def update(self):
         """Udpate objects"""
         pass

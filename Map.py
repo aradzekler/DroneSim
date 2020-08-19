@@ -1,21 +1,30 @@
 import pygame
 import constants
 from PIL import Image
+import numpy as np
 from interfaces.pygame_object_interface import PyGameObjectInterface
+from drone import Drone
 
 # Main class for dealing with out map.
 class Map(PyGameObjectInterface):
     def __init__(self,main,map_image_path:str):
+        self.main = main
         self.map_image_path = map_image_path
         self.map_width = 0
         self.map_height = 0
-        self.main = main
+        self.drone = Drone(self,300, 250)
         self.collide_list = []  # a list full of all the 'black spots'/walls
         self.surface = []  # a list full of all the 'black spots'/walls
 
 
+    def update(self):
+         self.update_all([self.drone])
+      
+ 
     def display(self):
-        self.main.main_s.blit(self.surface, (200,0))  # filling screen with map
+        self.display_all([self.drone])
+        self.main.surface.blit(self.surface, (200,0))  # filling screen with map
+        
 
 
     def create_map_from_img(self):
@@ -35,6 +44,7 @@ class Map(PyGameObjectInterface):
             # map_array = (self.map_height,self.map_width)
             # np.zeros(map_array)
             # TODO convert to numpy if possible
+            
             for i in range(self.map_width):
                 map_array.append([])
                 for j in range(self.map_height):
@@ -54,8 +64,7 @@ class Map(PyGameObjectInterface):
             print('Wall (black) blocks: ' + str(count_black_b),
                   'Path (white) blocks: ' + str(count_white_b))
             for x in range(self.map_width - 1):
-                for y in range(
-                        self.map_height - 1):  # for every black pixel, if there is a white pixel in his near
+                for y in range(self.map_height - 1):  # for every black pixel, if there is a white pixel in his near
                     # environment, add to collide_list. if not, pass.
                     if ((map_array[x - 1][y - 1] == constants.WHITE or map_array[x][y - 1] == constants.WHITE or
                          map_array[x + 1][y - 1] == constants.WHITE or
