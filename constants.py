@@ -2,7 +2,7 @@ import pygame
 import enum 
 
 # Original image
-MAP_IMAGE_PATH:str = "/home/ron/Desktop/ROBOTICA_SOP/DroneSim/.maps/p15.png"
+MAP_IMAGE_PATH:str = r"E:/Repos/DroneSim/.maps/p15.png"
 # Image after we remove all execpt BLACK and WHITE pixels
 TMP_MAP_PATH:str  = ".maps/mew_map.png"
 

@@ -41,7 +41,7 @@ class Drone:
         self.main = main
         auto_state = AutoState()
         manual_state = ManualState()
-        self.state = auto_state  # the drone state
+        self.state = manual_state  # the drone state
         self.event = ''
 
         # sensors

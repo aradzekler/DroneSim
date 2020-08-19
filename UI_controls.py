@@ -70,7 +70,8 @@ class UiControls:
                         button['color'] = INACTIVE_BUTTON_COLOR
         if self.drone.event == 'manual_control':  # if we are in manual control
             self.drone.on_event('manual_control')
-
+        if self.drone.event == 'auto_control':  # if we are in auto control
+            self.drone.on_event('auto_control')
 
     def init_buttons(self):
         """Init buttons list"""
