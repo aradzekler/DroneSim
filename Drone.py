@@ -1,6 +1,6 @@
 import pygame
 import math as math
-from model_states import ManualState,AutoState
+from Model_States import ManualState,AutoState
 
 # TODO: ADD LIDARS, ADD AI, GENERICS
 
@@ -39,10 +39,10 @@ class Drone:
         self.rect.y = self.body.get_rect().height / 2 + y
         self.game_map = game_map
         self.main = main
-        manual_state = ManualState()
         auto_state = AutoState()
-        self.state = manual_state  # the drone state
-        self.event = 'manual_control'
+        manual_state = ManualState()
+        self.state = auto_state  # the drone state
+        self.event = ''
 
         # sensors
         self.show_sensors = True
@@ -126,13 +126,26 @@ class Drone:
 
         # The next state will be the result of the on_event function.
 
+        if event == 'auto_control':  # if we are in auto state
+            print("auto_control")
+            self.left=True
+            # pygame.event.get()
+            key = pygame.key.get_pressed()
+            self.manual_press(key)
+            self.move()
+            self.move()
+            self.move()
+            self.move()
+            self.move()
+            self.rotate()
+            self.rotate()
+            self.rotate()
+            self.state = self.state.on_event(event)
         if event == 'manual_control':  # if we are in manual
             key = pygame.key.get_pressed()
             self.manual_press(key)
-        elif event == 'auto_control':  # if we are in auto state
-            print("")
-
-        self.state = self.state.on_event(event)
+            print("manual_control")
+            self.state = self.state.on_event(event)
 
     # setter methods for rectx and recty
     def set_rect_x(self, x):

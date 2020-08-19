@@ -2,11 +2,11 @@ import datetime
 import pygame
 import easygui as eg  # https://github.com/robertlugg/easygui   - easy way to open file dialog and other gui things.
 import constants
-from drone import Drone
-from map import Map
-from ui_controls import UiControls
-from ui_metrics import UiMetrics
-from logger import Logger
+from Drone import Drone
+from Map import Map
+from UI_controls import UiControls
+from UI_metrics import UiMetrics
+from Logger import Logger
 
 magenta = (255, 0, 255)
 cyan = (0, 255, 255)
