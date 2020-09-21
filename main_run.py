@@ -1,6 +1,6 @@
 import datetime
 import pygame
-import easygui as eg  # https://github.com/robertlugg/easygui   - easy way to open file dialog and other gui things.
+#import easygui as eg  # https://github.com/robertlugg/easygui   - easy way to open file dialog and other gui things.
 import constants
 from drone import Drone
 from map import Map
